@@ -739,7 +739,31 @@ function estimatedChartPeriod(year,org,period){
     : make(`${year-1}-12-08`,`${year}-12-06`);
 }
 
+const OFFICIAL_CHART_PERIODS = {
+  2026:{
+    billboard:{
+      firstHalf:{
+        start:'2025-11-24',
+        end:'2026-05-24',
+        announced:true,
+        estimated:false
+      }
+    },
+    oricon:{
+      firstHalf:{
+        start:'2025-12-08',
+        end:'2026-06-07',
+        announced:true,
+        estimated:false
+      }
+    }
+  }
+};
+
 function chartPeriod(year,org,period){
+  const official = OFFICIAL_CHART_PERIODS?.[year]?.[org]?.[period];
+  if(official) return official;
+
   return chartData?.years?.[year]?.[org]?.[period] ||
     estimatedChartPeriod(year,org,period);
 }
