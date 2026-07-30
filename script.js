@@ -12,15 +12,15 @@ const TYPE = {
 
 const COLORS = [
   ['default','デフォルト','#9bcce0'],
-  ['yellow','💛 黄','#f4c542'],
-  ['purple','💜 紫','#8a69b8'],
-  ['white','🤍 白','#f2f2f2'],
-  ['pink','🩷 ピンク','#e88dbb'],
-  ['orange','🧡 オレンジ','#e59a43'],
-  ['green','💚 緑','#55a86c'],
-  ['black','🖤 黒','#30353a'],
-  ['red','❤️ 赤','#cf4f5f'],
-  ['blue','💙 青','#4c86d9'],
+  ['yellow','黄','#f4c542'],
+  ['purple','紫','#8a69b8'],
+  ['white','白','#f2f2f2'],
+  ['pink','ピンク','#e88dbb'],
+  ['orange','オレンジ','#e59a43'],
+  ['green','緑','#55a86c'],
+  ['black','黒','#30353a'],
+  ['red','赤','#cf4f5f'],
+  ['blue','青','#4c86d9'],
   ['custom','🎨 カスタム','#9bcce0']
 ];
 
