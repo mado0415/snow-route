@@ -1514,3 +1514,125 @@ body.dark .route-chart.route-past .route-content strong {
     grid-template-columns:1fr;
   }
 }
+
+
+/* v1.0.1 chart data update status */
+.chart-data-notice {
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  margin:0 0 14px;
+  padding:14px 15px;
+  border:1px solid #e4c76f;
+  border-radius:17px;
+  background:#fff8df;
+  color:#66521b;
+  box-shadow:0 6px 18px rgba(70,55,20,.06);
+}
+
+.chart-data-notice[data-state="expired"],
+.chart-data-notice[data-state="error"] {
+  border-color:#e0a9ad;
+  background:#fff0f1;
+  color:#7c353c;
+}
+
+.chart-data-notice-icon {
+  flex:0 0 auto;
+  font-size:22px;
+  line-height:1.2;
+}
+
+.chart-data-notice strong {
+  display:block;
+  font-size:14px;
+  line-height:1.45;
+}
+
+.chart-data-notice p {
+  margin:4px 0 0;
+  font-size:12px;
+  line-height:1.65;
+}
+
+.chart-data-status {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  margin:2px 0 15px;
+  padding:11px 12px;
+  border-radius:14px;
+  background:color-mix(in srgb, #62a97b 13%, var(--card));
+  color:#39704d;
+  font-size:13px;
+}
+
+.chart-data-status-dot {
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#55a86c;
+  box-shadow:0 0 0 4px color-mix(in srgb, #55a86c 18%, transparent);
+}
+
+.chart-data-status[data-state="warning"] {
+  background:color-mix(in srgb, #d4a72c 15%, var(--card));
+  color:#795f14;
+}
+.chart-data-status[data-state="warning"] .chart-data-status-dot {
+  background:#d4a72c;
+  box-shadow:0 0 0 4px color-mix(in srgb, #d4a72c 18%, transparent);
+}
+
+.chart-data-status[data-state="expired"],
+.chart-data-status[data-state="error"] {
+  background:color-mix(in srgb, #c65a63 13%, var(--card));
+  color:#8a3d44;
+}
+.chart-data-status[data-state="expired"] .chart-data-status-dot,
+.chart-data-status[data-state="error"] .chart-data-status-dot {
+  background:#c65a63;
+  box-shadow:0 0 0 4px color-mix(in srgb, #c65a63 18%, transparent);
+}
+
+.chart-data-meta {
+  margin:0;
+  border-top:1px solid var(--line);
+}
+
+.chart-data-meta > div {
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  padding:10px 2px;
+  border-bottom:1px solid var(--line);
+  font-size:13px;
+}
+
+.chart-data-meta dt {
+  color:var(--sub);
+}
+
+.chart-data-meta dd {
+  margin:0;
+  font-weight:700;
+  text-align:right;
+}
+
+.chart-data-help {
+  margin:13px 0 0;
+  line-height:1.65;
+}
+
+body.dark .chart-data-notice {
+  border-color:#72632f;
+  background:#342f1f;
+  color:#eadb9a;
+}
+
+body.dark .chart-data-notice[data-state="expired"],
+body.dark .chart-data-notice[data-state="error"] {
+  border-color:#71454a;
+  background:#392629;
+  color:#efb7bc;
+}
