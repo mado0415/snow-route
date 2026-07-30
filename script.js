@@ -64,6 +64,9 @@ let fixedEvents = DEFAULT_FIXED_EVENTS;
 let state = loadState();
 let chartData = null;
 let currentDetailId = null;
+let currentView = 'home';
+let calendarCursor = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let selectedCalendarDate = localDate();
 
 function defaultState(){
   return {
@@ -298,7 +301,202 @@ function render(){
   renderHero(active);
   renderCards(active);
   renderArchive();
+  renderCalendar();
+  applyView();
   maybeDailyOpening(active);
+}
+
+
+function setView(view){
+  currentView = view === 'calendar' ? 'calendar' : 'home';
+
+  if(currentView === 'calendar'){
+    const selected = parseDate(selectedCalendarDate);
+    calendarCursor = new Date(selected.getFullYear(), selected.getMonth(), 1);
+    renderCalendar();
+  }
+
+  applyView();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function applyView(){
+  const isCalendar = currentView === 'calendar';
+
+  document.getElementById('homeView').classList.toggle('hidden',isCalendar);
+  document.getElementById('calendarView').classList.toggle('hidden',!isCalendar);
+  document.getElementById('homeTabBtn').classList.toggle('active',!isCalendar);
+  document.getElementById('calendarTabBtn').classList.toggle('active',isCalendar);
+  document.getElementById('newBtn').classList.toggle('hidden',isCalendar);
+}
+
+function calendarEvents(){
+  const events = [];
+
+  state.projects
+    .filter(p=>!p.archived)
+    .forEach(p=>{
+      projectMilestones(p).forEach(m=>{
+        events.push({
+          date:localDate(m.date),
+          projectId:p.id,
+          title:p.title,
+          typeLabel:typeInfo(p).label,
+          typeIcon:typeInfo(p).icon,
+          milestone:m.label,
+          color:memberColor(p)
+        });
+      });
+    });
+
+  return events.sort((a,b)=>
+    a.date.localeCompare(b.date) ||
+    a.title.localeCompare(b.title,'ja')
+  );
+}
+
+function renderCalendar(){
+  const year = calendarCursor.getFullYear();
+  const month = calendarCursor.getMonth();
+  const today = localDate();
+  const events = calendarEvents();
+  const byDate = new Map();
+
+  events.forEach(event=>{
+    if(!byDate.has(event.date)) byDate.set(event.date,[]);
+    byDate.get(event.date).push(event);
+  });
+
+  document.getElementById('calendarMonthTitle').textContent =
+    `${year}年${month+1}月`;
+
+  const firstWeekday = new Date(year,month,1).getDay();
+  const lastDate = new Date(year,month+1,0).getDate();
+  const previousLastDate = new Date(year,month,0).getDate();
+  const cells = [];
+
+  for(let i=0;i<42;i++){
+    let cellDate;
+    let day;
+    let outside = false;
+
+    if(i < firstWeekday){
+      day = previousLastDate - firstWeekday + i + 1;
+      cellDate = new Date(year,month-1,day);
+      outside = true;
+    }else if(i >= firstWeekday + lastDate){
+      day = i - firstWeekday - lastDate + 1;
+      cellDate = new Date(year,month+1,day);
+      outside = true;
+    }else{
+      day = i - firstWeekday + 1;
+      cellDate = new Date(year,month,day);
+    }
+
+    const key = localDate(cellDate);
+    const dayEvents = byDate.get(key) || [];
+    const dots = dayEvents.slice(0,3)
+      .map(e=>`<span class="calendar-dot" style="--dot-color:${e.color}"></span>`)
+      .join('');
+    const more = dayEvents.length > 3
+      ? `<span class="calendar-more">+</span>`
+      : '';
+
+    cells.push(`
+      <button
+        type="button"
+        class="calendar-cell
+          ${outside ? 'outside' : ''}
+          ${key===today ? 'today' : ''}
+          ${key===selectedCalendarDate ? 'selected' : ''}
+          ${dayEvents.length ? 'has-events' : ''}"
+        data-calendar-date="${key}"
+        aria-label="${cellDate.getFullYear()}年${cellDate.getMonth()+1}月${day}日${dayEvents.length ? `、節目${dayEvents.length}件` : ''}"
+      >
+        <span class="calendar-day-number">${day}</span>
+        <span class="calendar-dots">${dots}${more}</span>
+      </button>
+    `);
+  }
+
+  document.getElementById('calendarGrid').innerHTML = cells.join('');
+
+  document.querySelectorAll('[data-calendar-date]').forEach(button=>{
+    button.onclick = ()=>{
+      selectedCalendarDate = button.dataset.calendarDate;
+      const date = parseDate(selectedCalendarDate);
+
+      if(
+        date.getFullYear() !== calendarCursor.getFullYear() ||
+        date.getMonth() !== calendarCursor.getMonth()
+      ){
+        calendarCursor = new Date(date.getFullYear(),date.getMonth(),1);
+      }
+
+      renderCalendar();
+    };
+  });
+
+  renderSelectedCalendarDate(byDate);
+}
+
+function renderSelectedCalendarDate(byDate){
+  const date = parseDate(selectedCalendarDate);
+  const events = byDate.get(selectedCalendarDate) || [];
+  const title = `${date.getMonth()+1}月${date.getDate()}日`;
+
+  document.getElementById('selectedDateTitle').textContent =
+    selectedCalendarDate === localDate() ? `${title}（今日）` : title;
+
+  document.getElementById('selectedDateCount').textContent =
+    events.length ? `${events.length}件` : '';
+
+  const container = document.getElementById('selectedDateEvents');
+
+  if(!events.length){
+    container.innerHTML = `
+      <div class="calendar-empty">
+        この日に登録されている節目はありません。
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = events.map(event=>`
+    <button
+      type="button"
+      class="calendar-event"
+      onclick="openDetailFromCalendar('${event.projectId}')"
+    >
+      <span class="calendar-event-dot" style="--dot-color:${event.color}"></span>
+      <span class="calendar-event-text">
+        <strong>${escapeHtml(event.title)}</strong>
+        <small>${escapeHtml(event.milestone)} ・ ${event.typeIcon} ${escapeHtml(event.typeLabel)}</small>
+      </span>
+      <span class="calendar-event-arrow">›</span>
+    </button>
+  `).join('');
+}
+
+function moveCalendarMonth(amount){
+  calendarCursor = new Date(
+    calendarCursor.getFullYear(),
+    calendarCursor.getMonth()+amount,
+    1
+  );
+  selectedCalendarDate = localDate(calendarCursor);
+  renderCalendar();
+}
+
+function returnCalendarToToday(){
+  const now = new Date();
+  calendarCursor = new Date(now.getFullYear(),now.getMonth(),1);
+  selectedCalendarDate = localDate(now);
+  renderCalendar();
+}
+
+function openDetailFromCalendar(id){
+  openDetail(id);
 }
 
 function renderToday(){
@@ -1166,6 +1364,11 @@ async function importAll(file){
   }
 }
 
+document.getElementById('homeTabBtn').onclick = ()=>setView('home');
+document.getElementById('calendarTabBtn').onclick = ()=>setView('calendar');
+document.getElementById('prevMonthBtn').onclick = ()=>moveCalendarMonth(-1);
+document.getElementById('nextMonthBtn').onclick = ()=>moveCalendarMonth(1);
+document.getElementById('calendarMonthTitle').onclick = returnCalendarToToday;
 document.getElementById('newBtn').onclick = ()=>openEditor();
 document.getElementById('settingsBtn').onclick = openSettings;
 document.getElementById('archiveBtn').onclick = ()=>openModal('archiveModal');
@@ -1187,6 +1390,7 @@ document.getElementById('dailyClose').onclick = ()=>{
 };
 
 window.openDetail = openDetail;
+window.openDetailFromCalendar = openDetailFromCalendar;
 window.openEditor = openEditor;
 window.closeModal = closeModal;
 window.archiveProject = archiveProject;
