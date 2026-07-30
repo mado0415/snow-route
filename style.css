@@ -1079,12 +1079,16 @@ body.dark .chart-estimate-note {
 }
 
 .calendar-dots {
+  position:absolute;
+  top:35px;
+  left:2px;
+  right:2px;
   display:flex;
   align-items:center;
   justify-content:center;
   gap:2px;
-  min-height:12px;
-  margin-top:2px;
+  min-height:9px;
+  margin:0;
 }
 
 .calendar-dot,
