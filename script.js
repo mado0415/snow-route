@@ -2,6 +2,7 @@
 const STORAGE_KEY = 'snowRouteDataV1';
 const CHART_URL = './chart-periods.json';
 const CALENDAR_URL = './calendar.json';
+const DEFAULT_ACCENT = '#5aa9ca';
 
 const TYPE = {
   digital:{icon:'🎧',label:'デジタル',day:'㊗️ 配信開始！',after:'リリースから'},
@@ -989,7 +990,7 @@ function deleteProject(id){
 function applySettings(){
   document.documentElement.style.setProperty(
     '--accent-strong',
-    state.settings.accent || '#5aa9ca'
+    state.settings.accent || DEFAULT_ACCENT
   );
 
   document.body.classList.toggle(
@@ -998,12 +999,12 @@ function applySettings(){
   );
 
   document.querySelector('meta[name="theme-color"]').content =
-    state.settings.accent || '#5aa9ca';
+    state.settings.accent || DEFAULT_ACCENT;
 }
 
 function openSettings(){
   document.getElementById('accentInput').value =
-    state.settings.accent || '#5aa9ca';
+    state.settings.accent || DEFAULT_ACCENT;
 
   document.getElementById('modeInput').value =
     state.settings.mode || 'light';
@@ -1015,6 +1016,10 @@ function openSettings(){
     state.settings.effect!==false;
 
   openModal('settingsModal');
+}
+
+function resetAccentColor(){
+  document.getElementById('accentInput').value = DEFAULT_ACCENT;
 }
 
 function saveSettings(){
@@ -1168,6 +1173,7 @@ document.getElementById('addMilestoneBtn').onclick = ()=>addMilestoneRow();
 document.getElementById('addLinkBtn').onclick = ()=>addLinkRow();
 document.getElementById('typeInput').onchange = updateTypeFields;
 document.getElementById('memberInput').onchange = updateCustomColor;
+document.getElementById('resetAccentBtn').onclick = resetAccentColor;
 document.getElementById('saveSettingsBtn').onclick = saveSettings;
 document.getElementById('exportAllBtn').onclick = exportAll;
 
