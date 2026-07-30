@@ -789,8 +789,8 @@ function chartPanel(p){
             <small>${escapeHtml(st.text)}</small>
           </span>
 
-          <span class="status-tag ${v.announced ? 'official' : ''}">
-            ${v.announced ? '確定' : '目安'}
+          <span class="status-tag ${v.announced ? 'official' : 'estimated'}">
+            ${v.announced ? '公式確定' : '推定期間'}
           </span>
         </li>
       `);
@@ -802,6 +802,9 @@ function chartPanel(p){
       <h3>チャート期間</h3>
       <p class="detail-muted chart-note">
         基準日が各集計期間に含まれるかを自動判定しています。
+      </p>
+      <p class="chart-estimate-note">
+        ※「推定期間」は過去の集計傾向から算出した目安です。公式発表された期間ではありません。
       </p>
       <ul class="milestones">${rows.join('')}</ul>
     </div>
