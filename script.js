@@ -10,6 +10,13 @@ const TYPE = {
   event:{icon:'🎯',label:'目標・イベント',day:'🎉 イベント当日！',after:'開催から'}
 };
 
+const DEFAULT_MILESTONE_VISIBILITY = {
+  day30:true,
+  day100:true,
+  half:true,
+  year:true
+};
+
 const COLORS = [
   ['default','デフォルト','#9bcce0'],
   ['yellow','黄','#f4c542'],
@@ -157,6 +164,10 @@ function projectMilestones(p){
   const now = parseDate(localDate());
   const info = typeInfo(p);
   const list = [];
+  const visibility = {
+    ...DEFAULT_MILESTONE_VISIBILITY,
+    ...(p.milestoneVisibility || {})
+  };
 
   if((p.type==='cd' || p.type==='video') && p.showFlyingGet){
     list.push({
@@ -175,11 +186,30 @@ function projectMilestones(p){
   });
 
   if(p.type!=='event'){
-    list.push({key:'30',label:'30日',date:addDays(base,30),special:'🎉 リリース30日！'});
-    list.push({key:'100',label:'100日',date:addDays(base,100),special:'💯 リリース100日！'});
-    list.push({key:'half',label:'半年',date:addMonths(base,6),special:'🎉 リリース半年！'});
-    list.push({key:'year',label:'1周年',date:addMonths(base,12),special:'🎂 リリース1周年！'});
+    if(visibility.day30){
+      list.push({key:'30',label:'30日',date:addDays(base,30),special:'🎉 リリース30日！'});
+    }
+    if(visibility.day100){
+      list.push({key:'100',label:'100日',date:addDays(base,100),special:'💯 リリース100日！'});
+    }
+    if(visibility.half){
+      list.push({key:'half',label:'半年',date:addMonths(base,6),special:'🎉 リリース半年！'});
+    }
+    if(visibility.year){
+      list.push({key:'year',label:'1周年',date:addMonths(base,12),special:'🎂 リリース1周年！'});
+    }
   }
+
+  (p.customMilestones || []).forEach(item=>{
+    if(!item?.label || !item?.date) return;
+    list.push({
+      key:item.id || uid('milestone'),
+      label:item.label,
+      date:parseDate(item.date),
+      special:item.message || `🎉 ${item.label}！`,
+      custom:true
+    });
+  });
 
   return list
     .map(x=>({...x,diff:dayDiff(now,x.date)}))
@@ -500,6 +530,16 @@ function openEditor(id=''){
   document.getElementById('messageInput').value = p?.eventMessage || '';
   document.getElementById('afterLabelInput').value = p?.afterLabel || '';
 
+  const visibility = {
+    ...DEFAULT_MILESTONE_VISIBILITY,
+    ...(p?.milestoneVisibility || {})
+  };
+  document.getElementById('milestone30Input').checked = visibility.day30;
+  document.getElementById('milestone100Input').checked = visibility.day100;
+  document.getElementById('milestoneHalfInput').checked = visibility.half;
+  document.getElementById('milestoneYearInput').checked = visibility.year;
+
+  renderCustomMilestonesEditor(p?.customMilestones || []);
   renderLinksEditor(p?.links || []);
   updateTypeFields();
   updateCustomColor();
@@ -515,6 +555,7 @@ function updateTypeFields(){
   );
 
   document.getElementById('messageInput').placeholder = defaultMessage(type);
+  document.getElementById('defaultMilestones').classList.toggle('hidden', type==='event');
 }
 
 function updateCustomColor(){
@@ -522,6 +563,57 @@ function updateCustomColor(){
     'hidden',
     document.getElementById('memberInput').value!=='custom'
   );
+}
+
+function renderCustomMilestonesEditor(items){
+  const box = document.getElementById('customMilestonesEditor');
+  box.innerHTML = '';
+  items.forEach(addMilestoneRow);
+}
+
+function addMilestoneRow(item={id:uid('milestone'),label:'',date:'',message:''}){
+  const row = document.createElement('div');
+  row.className = 'milestone-editor';
+  row.dataset.id = item.id || uid('milestone');
+
+  row.innerHTML = `
+    <div class="milestone-editor-grid">
+      <div class="field">
+        <label>節目名</label>
+        <input
+          class="milestone-label"
+          type="text"
+          maxlength="30"
+          value="${escapeHtml(item.label || '')}"
+          placeholder="例：初週終了"
+        >
+      </div>
+      <div class="field">
+        <label>日付</label>
+        <input
+          class="milestone-date"
+          type="date"
+          value="${escapeHtml(item.date || '')}"
+        >
+      </div>
+    </div>
+    <div class="field milestone-message-field">
+      <label>当日のメッセージ <span class="optional-label">任意</span></label>
+      <input
+        class="milestone-message"
+        type="text"
+        maxlength="40"
+        value="${escapeHtml(item.message || '')}"
+        placeholder="未入力なら「🎉 節目名！」"
+      >
+    </div>
+    <div class="milestone-editor-actions">
+      <button type="button" class="text-btn remove-milestone">削除</button>
+    </div>
+  `;
+
+  row.querySelector('.remove-milestone').onclick = ()=>row.remove();
+  document.getElementById('customMilestonesEditor').appendChild(row);
 }
 
 function renderLinksEditor(links){
@@ -589,6 +681,21 @@ document.getElementById('projectForm').addEventListener('submit',e=>{
     }))
     .filter(l=>l.label || l.url);
 
+  const customMilestones = [...document.querySelectorAll('.milestone-editor')]
+    .map(r=>({
+      id:r.dataset.id,
+      label:r.querySelector('.milestone-label').value.trim(),
+      date:r.querySelector('.milestone-date').value,
+      message:r.querySelector('.milestone-message').value.trim()
+    }))
+    .filter(m=>m.label || m.date || m.message);
+
+  const incompleteMilestone = customMilestones.find(m=>!m.label || !m.date);
+  if(incompleteMilestone){
+    alert('独自の節目は「節目名」と「日付」の両方を入力してください。');
+    return;
+  }
+
   const p = {
     id:id || uid('project'),
     title:document.getElementById('titleInput').value.trim(),
@@ -609,6 +716,13 @@ document.getElementById('projectForm').addEventListener('submit',e=>{
     afterLabel:
       document.getElementById('afterLabelInput').value.trim() ||
       TYPE[type].after,
+    milestoneVisibility:{
+      day30:document.getElementById('milestone30Input').checked,
+      day100:document.getElementById('milestone100Input').checked,
+      half:document.getElementById('milestoneHalfInput').checked,
+      year:document.getElementById('milestoneYearInput').checked
+    },
+    customMilestones,
     links,
     createdAt:id
       ? (state.projects.find(x=>x.id===id)?.createdAt || new Date().toISOString())
@@ -1050,6 +1164,7 @@ async function importAll(file){
 document.getElementById('newBtn').onclick = ()=>openEditor();
 document.getElementById('settingsBtn').onclick = openSettings;
 document.getElementById('archiveBtn').onclick = ()=>openModal('archiveModal');
+document.getElementById('addMilestoneBtn').onclick = ()=>addMilestoneRow();
 document.getElementById('addLinkBtn').onclick = ()=>addLinkRow();
 document.getElementById('typeInput').onchange = updateTypeFields;
 document.getElementById('memberInput').onchange = updateCustomColor;
