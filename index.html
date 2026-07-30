@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#dceff7" />
   <meta name="description" content="Snow Manの作品やイベントを、あと何日と節目で管理するファンメイドツールです。" />
   <title>SNOW ROUTE</title>
-  <link rel="stylesheet" href="./style.css?v=0.3.0" />
+  <link rel="stylesheet" href="./style.css?v=0.3.1" />
 </head>
 <body>
 <main class="app">
@@ -183,7 +183,11 @@
   <section class="modal">
     <div class="modal-head"><h2>設定</h2><button class="close-btn" data-close="settingsModal">✕</button></div>
     <div class="panel">
-      <div class="field"><label for="accentInput">アクセントカラー</label><input id="accentInput" type="color" value="#5aa9ca" /></div>
+      <div class="field">
+        <label for="accentInput">アクセントカラー</label>
+        <input id="accentInput" type="color" value="#5aa9ca" />
+        <button class="reset-accent-btn" id="resetAccentBtn" type="button">↺ 初期カラーに戻す</button>
+      </div>
       <div class="field"><label for="modeInput">表示モード</label><select id="modeInput"><option value="light">ライト</option><option value="dark">ダーク</option></select></div>
       <div class="field"><label for="openingInput">その日最初の表示</label><select id="openingInput"><option value="special">特別な日だけ</option><option value="daily">毎日</option><option value="off">表示しない</option></select></div>
       <div class="switch-row"><div><strong>お祝い演出</strong><small>特別な日に数秒だけ雪を降らせます</small></div><input class="switch" id="effectInput" type="checkbox" checked /></div>
@@ -206,6 +210,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=0.3.0" defer></script>
+<script src="./script.js?v=0.3.1" defer></script>
 </body>
 </html>
