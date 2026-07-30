@@ -1,0 +1,71 @@
+{
+  "updatedAt": "2026-07-30",
+  "events": [
+    {
+      "m": 1,
+      "d": 22,
+      "type": "anniversary",
+      "label": "🎉 Snow Man デビュー記念日"
+    },
+    {
+      "m": 5,
+      "d": 3,
+      "type": "anniversary",
+      "label": "🎉 Snow Man 結成記念日"
+    },
+    {
+      "m": 5,
+      "d": 17,
+      "type": "birthday",
+      "label": "🎂 岩本照さんのお誕生日"
+    },
+    {
+      "m": 5,
+      "d": 5,
+      "type": "birthday",
+      "label": "🎂 深澤辰哉さんのお誕生日"
+    },
+    {
+      "m": 6,
+      "d": 27,
+      "type": "birthday",
+      "label": "🎂 ラウールさんのお誕生日"
+    },
+    {
+      "m": 11,
+      "d": 5,
+      "type": "birthday",
+      "label": "🎂 渡辺翔太さんのお誕生日"
+    },
+    {
+      "m": 6,
+      "d": 21,
+      "type": "birthday",
+      "label": "🎂 向井康二さんのお誕生日"
+    },
+    {
+      "m": 11,
+      "d": 27,
+      "type": "birthday",
+      "label": "🎂 阿部亮平さんのお誕生日"
+    },
+    {
+      "m": 2,
+      "d": 16,
+      "type": "birthday",
+      "label": "🎂 目黒蓮さんのお誕生日"
+    },
+    {
+      "m": 3,
+      "d": 25,
+      "type": "birthday",
+      "label": "🎂 宮舘涼太さんのお誕生日"
+    },
+    {
+      "m": 7,
+      "d": 5,
+      "type": "birthday",
+      "label": "🎂 佐久間大介さんのお誕生日"
+    }
+  ]
+}
