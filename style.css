@@ -696,3 +696,32 @@ body.dark textarea {
     grid-template-columns:1fr 1.5fr;
   }
 }
+
+/* v0.2.2 editor layout */
+.field-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.field-grid .field {
+  min-width: 0;
+}
+
+.field-grid input,
+.field-grid select {
+  min-width: 0;
+  max-width: 100%;
+}
+
+input[type="date"] {
+  min-width: 0;
+  max-width: 100%;
+}
+
+@media (max-width: 350px) {
+  .field-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
