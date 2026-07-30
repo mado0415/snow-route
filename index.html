@@ -40,38 +40,106 @@
 
 <div class="modal-wrap" id="editModal">
   <section class="modal">
-    <div class="modal-head"><h2 id="editTitle">新しいプロジェクト</h2><button class="close-btn" data-close="editModal">✕</button></div>
+    <div class="modal-head">
+      <h2 id="editTitle">新しいプロジェクト</h2>
+      <button class="close-btn" data-close="editModal" aria-label="閉じる">✕</button>
+    </div>
+
     <form id="projectForm">
       <input type="hidden" id="projectId" />
+
       <div class="panel">
-        <div class="field"><label for="titleInput">タイトル *</label><input id="titleInput" type="text" maxlength="80" required /></div>
-        <div class="field"><label for="typeInput">種類 *</label><select id="typeInput"><option value="digital">🎧 デジタル</option><option value="cd">💿 CD</option><option value="video">📀 DVD・Blu-ray</option><option value="event">🎯 目標・イベント</option></select></div>
-        <div class="field"><label for="dateInput">基準日 *</label><input id="dateInput" type="date" required /></div>
-        <div class="field"><label for="memberInput">表示カラー</label><select id="memberInput"></select></div>
-        <div class="field hidden" id="customColorField"><label for="customColorInput">カスタムカラー</label><input id="customColorInput" type="color" value="#9bcce0" /></div>
-        <div class="field"><label for="memoInput">メモ</label><textarea id="memoInput" maxlength="300" placeholder="例：初週はSTORE CHECKも見る"></textarea></div>
+        <div class="field">
+          <label for="titleInput">タイトル *</label>
+          <input id="titleInput" type="text" maxlength="80" required />
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="typeInput">種類 *</label>
+            <select id="typeInput">
+              <option value="digital">🎧 デジタル</option>
+              <option value="cd">💿 CD</option>
+              <option value="video">📀 DVD・Blu-ray</option>
+              <option value="event">🎯 目標・イベント</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="dateInput">基準日 *</label>
+            <input id="dateInput" type="date" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="memberInput">カードの色</label>
+          <select id="memberInput"></select>
+        </div>
+
+        <div class="field hidden" id="customColorField">
+          <label for="customColorInput">カスタムカラー</label>
+          <input id="customColorInput" type="color" value="#9bcce0" />
+        </div>
+
+        <div class="field">
+          <label for="memoInput">メモ</label>
+          <textarea id="memoInput" maxlength="300" placeholder="例：当日に確認したいことや予定をメモ"></textarea>
+        </div>
       </div>
 
       <div class="panel">
-        <div class="switch-row"><div><strong>📌 ピン留め</strong><small>一覧の上部に表示します</small></div><input class="switch" id="pinnedInput" type="checkbox" /></div>
-        <div class="switch-row"><div><strong>🔥 応援中</strong><small>カードに「応援中」を表示します</small></div><input class="switch" id="activeInput" type="checkbox" checked /></div>
-        <div class="switch-row" id="flyingRow"><div><strong>フラゲ日を表示</strong><small>発売日前日を特別表示します</small></div><input class="switch" id="flyingInput" type="checkbox" checked /></div>
-        <div class="field"><label for="messageInput">当日メッセージ</label><input id="messageInput" type="text" maxlength="40" placeholder="自動設定" /></div>
-        <div class="field"><label for="afterLabelInput">経過後の表現</label><input id="afterLabelInput" type="text" maxlength="20" placeholder="例：リリースから" /></div>
+        <div class="switch-row">
+          <div><strong>📌 ピン留め</strong><small>一覧の上部に表示します</small></div>
+          <input class="switch" id="pinnedInput" type="checkbox" />
+        </div>
+        <div class="switch-row">
+          <div><strong>🔥 応援中</strong><small>カードに「応援中」を表示します</small></div>
+          <input class="switch" id="activeInput" type="checkbox" checked />
+        </div>
+        <div class="switch-row" id="flyingRow">
+          <div><strong>フラゲ日を表示</strong><small>発売日前日を特別表示します</small></div>
+          <input class="switch" id="flyingInput" type="checkbox" checked />
+        </div>
+        <div class="field">
+          <label for="messageInput">当日メッセージ</label>
+          <input id="messageInput" type="text" maxlength="40" placeholder="自動設定" />
+        </div>
+        <div class="field">
+          <label for="afterLabelInput">経過後の表現</label>
+          <input id="afterLabelInput" type="text" maxlength="20" placeholder="例：リリースから" />
+        </div>
       </div>
 
       <div class="panel">
-        <div class="section-head" style="margin:0 0 6px"><h2>リンク</h2><button type="button" class="text-btn" id="addLinkBtn">＋追加</button></div><p class="field-help">「ホームに表示」を選んだリンクは、先頭から3件までカードに表示されます。</p>
+        <div class="section-head" style="margin:0 0 6px">
+          <h2>リンク</h2>
+          <button type="button" class="text-btn" id="addLinkBtn">＋追加</button>
+        </div>
+        <p class="field-help">「ホームに表示」を選んだリンクは、先頭から3件までカードに表示されます。</p>
         <div id="linksEditor"></div>
       </div>
 
-      <div class="btn-row"><button type="button" class="secondary" data-close="editModal">編集をやめて戻る</button><button class="primary" type="submit" style="flex:1">保存する</button></div>
+      <div class="btn-row">
+        <button type="button" class="secondary" data-close="editModal">編集をやめて戻る</button>
+        <button class="primary" type="submit" style="flex:1">保存する</button>
+      </div>
     </form>
   </section>
 </div>
 
-<div class="modal-wrap" id="detailModal"><section class="modal"><div class="modal-head"><h2>詳細</h2><button class="close-btn" data-close="detailModal">✕</button></div><div id="detailContent"></div></section></div>
-<div class="modal-wrap" id="archiveModal"><section class="modal"><div class="modal-head"><h2>アーカイブ</h2><button class="close-btn" data-close="archiveModal">✕</button></div><div class="cards" id="archiveList"></div></section></div>
+<div class="modal-wrap" id="detailModal">
+  <section class="modal">
+    <div class="modal-head"><h2>詳細</h2><button class="close-btn" data-close="detailModal">✕</button></div>
+    <div id="detailContent"></div>
+  </section>
+</div>
+
+<div class="modal-wrap" id="archiveModal">
+  <section class="modal">
+    <div class="modal-head"><h2>アーカイブ</h2><button class="close-btn" data-close="archiveModal">✕</button></div>
+    <div class="cards" id="archiveList"></div>
+  </section>
+</div>
 
 <div class="modal-wrap" id="settingsModal">
   <section class="modal">
@@ -91,7 +159,15 @@
   </section>
 </div>
 
-<div class="daily-overlay" id="dailyOverlay"><div class="daily-card"><h2 id="dailyDate"></h2><div class="daily-events" id="dailyEvents"></div><div id="dailyNext" class="detail-muted"></div><button class="primary full" id="dailyClose" style="margin-top:18px">SNOW ROUTEを見る</button></div></div>
-  <script src="./script.js" defer></script>
+<div class="daily-overlay" id="dailyOverlay">
+  <div class="daily-card">
+    <h2 id="dailyDate"></h2>
+    <div class="daily-events" id="dailyEvents"></div>
+    <div id="dailyNext" class="detail-muted"></div>
+    <button class="primary full" id="dailyClose" style="margin-top:18px">SNOW ROUTEを見る</button>
+  </div>
+</div>
+
+<script src="./script.js" defer></script>
 </body>
 </html>
