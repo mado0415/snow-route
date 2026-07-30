@@ -1147,7 +1147,7 @@ body.dark .chart-estimate-note {
 
 .calendar-event {
   display:grid;
-  grid-template-columns:13px 1fr 18px;
+  grid-template-columns:13px minmax(0,1fr) auto;
   align-items:center;
   gap:10px;
   width:100%;
@@ -1190,6 +1190,20 @@ body.dark .chart-estimate-note {
 .calendar-event-arrow {
   color:var(--sub);
   font-size:24px;
+}
+
+.calendar-event-official {
+  cursor:default;
+}
+
+.calendar-event-mark {
+  padding:4px 7px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  color:var(--sub);
+  font-size:10px;
+  font-weight:800;
+  white-space:nowrap;
 }
 
 body.dark .view-tab.active {
