@@ -1107,11 +1107,14 @@ body.dark .chart-estimate-note {
 
 .calendar-marker.official,
 .calendar-marker.personal {
-  width:9px;
-  height:9px;
+  width:11px;
+  height:11px;
+  border:0;
+  border-radius:0;
+  background:transparent;
   color:var(--dot-color,var(--accent-strong));
   font-family:Arial, sans-serif;
-  font-size:11px;
+  font-size:13px;
   font-weight:700;
   line-height:1;
 }
@@ -1248,11 +1251,11 @@ body.dark .view-tab.active {
 
   .calendar-marker.official,
   .calendar-marker.personal {
-    width:8px;
-    height:8px;
+    width:10px;
+    height:10px;
   }
 
   .calendar-marker.official {
-    font-size:10px;
+    font-size:12px;
   }
 }
