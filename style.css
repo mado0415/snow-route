@@ -1107,16 +1107,19 @@ body.dark .chart-estimate-note {
 
 .calendar-marker.official,
 .calendar-marker.personal {
-  width:11px;
-  height:11px;
+  width:9px;
+  height:9px;
   border:0;
   border-radius:0;
   background:transparent;
   color:var(--dot-color,var(--accent-strong));
   font-family:Arial, sans-serif;
-  font-size:13px;
   font-weight:700;
   line-height:1;
+}
+
+.calendar-marker.official {
+  font-size:10px;
 }
 
 .calendar-marker.personal {
@@ -1197,13 +1200,13 @@ body.dark .chart-estimate-note {
   width:16px;
   color:var(--dot-color,var(--accent-strong));
   font-family:Arial, sans-serif;
-  font-size:20px;
+  font-size:16px;
   font-weight:700;
   line-height:1;
 }
 
 .calendar-event-symbol.personal {
-  font-size:14px;
+  font-size:12px;
 }
 
 .calendar-event-text {
@@ -1251,11 +1254,11 @@ body.dark .view-tab.active {
 
   .calendar-marker.official,
   .calendar-marker.personal {
-    width:10px;
-    height:10px;
+    width:9px;
+    height:9px;
   }
 
   .calendar-marker.official {
-    font-size:12px;
+    font-size:10px;
   }
 }
