@@ -47,17 +47,28 @@ const LEGACY_COLOR_KEYS = {
 };
 
 const DEFAULT_FIXED_EVENTS = [
-  {m:1,d:22,type:'anniversary',label:'🎉 Snow Man デビュー記念日'},
-  {m:5,d:3,type:'anniversary',label:'🎉 Snow Man 結成記念日'},
-  {m:5,d:17,type:'birthday',label:'🎂 岩本照さんのお誕生日'},
-  {m:5,d:5,type:'birthday',label:'🎂 深澤辰哉さんのお誕生日'},
-  {m:6,d:27,type:'birthday',label:'🎂 ラウールさんのお誕生日'},
-  {m:11,d:5,type:'birthday',label:'🎂 渡辺翔太さんのお誕生日'},
-  {m:6,d:21,type:'birthday',label:'🎂 向井康二さんのお誕生日'},
-  {m:11,d:27,type:'birthday',label:'🎂 阿部亮平さんのお誕生日'},
-  {m:2,d:16,type:'birthday',label:'🎂 目黒蓮さんのお誕生日'},
-  {m:3,d:25,type:'birthday',label:'🎂 宮舘涼太さんのお誕生日'},
-  {m:7,d:5,type:'birthday',label:'🎂 佐久間大介さんのお誕生日'}
+  {id:'group-debut',m:1,d:22,type:'anniversary',category:'group',icon:'⛄️',title:'Snow Man デビュー記念日',sinceYear:2020,color:'#9bcce0'},
+  {id:'group-formation',m:5,d:3,type:'anniversary',category:'group',icon:'❄️',title:'Snow Man 結成記念日',sinceYear:2012,color:'#9bcce0'},
+
+  {id:'birthday-meguro',m:2,d:16,type:'birthday',category:'member',icon:'🎂',title:'目黒蓮さんのお誕生日',sinceYear:1997,color:'#30353a'},
+  {id:'birthday-miyadate',m:3,d:25,type:'birthday',category:'member',icon:'🎂',title:'宮舘涼太さんのお誕生日',sinceYear:1993,color:'#cf4f5f'},
+  {id:'birthday-fukazawa',m:5,d:5,type:'birthday',category:'member',icon:'🎂',title:'深澤辰哉さんのお誕生日',sinceYear:1992,color:'#8a69b8'},
+  {id:'birthday-iwamoto',m:5,d:17,type:'birthday',category:'member',icon:'🎂',title:'岩本照さんのお誕生日',sinceYear:1993,color:'#f4c542'},
+  {id:'birthday-mukai',m:6,d:21,type:'birthday',category:'member',icon:'🎂',title:'向井康二さんのお誕生日',sinceYear:1994,color:'#e59a43'},
+  {id:'birthday-raul',m:6,d:27,type:'birthday',category:'member',icon:'🎂',title:'ラウールさんのお誕生日',sinceYear:2003,color:'#f2f2f2'},
+  {id:'birthday-sakuma',m:7,d:5,type:'birthday',category:'member',icon:'🎂',title:'佐久間大介さんのお誕生日',sinceYear:1992,color:'#e88dbb'},
+  {id:'birthday-watanabe',m:11,d:5,type:'birthday',category:'member',icon:'🎂',title:'渡辺翔太さんのお誕生日',sinceYear:1992,color:'#4c86d9'},
+  {id:'birthday-abe',m:11,d:27,type:'birthday',category:'member',icon:'🎂',title:'阿部亮平さんのお誕生日',sinceYear:1993,color:'#55a86c'},
+
+  {id:'join-raul',m:5,d:2,type:'join',category:'member',icon:'🌟',title:'ラウールさん 入所記念日',sinceYear:2015,color:'#f2f2f2'},
+  {id:'join-watanabe',m:6,d:26,type:'join',category:'member',icon:'🌟',title:'渡辺翔太さん 入所記念日',sinceYear:2005,color:'#4c86d9'},
+  {id:'join-fukazawa',m:8,d:12,type:'join',category:'member',icon:'🌟',title:'深澤辰哉さん 入所記念日',sinceYear:2004,color:'#8a69b8'},
+  {id:'join-abe',m:8,d:12,type:'join',category:'member',icon:'🌟',title:'阿部亮平さん 入所記念日',sinceYear:2004,color:'#55a86c'},
+  {id:'join-sakuma',m:9,d:25,type:'join',category:'member',icon:'🌟',title:'佐久間大介さん 入所記念日',sinceYear:2005,color:'#e88dbb'},
+  {id:'join-miyadate',m:10,d:1,type:'join',category:'member',icon:'🌟',title:'宮舘涼太さん 入所記念日',sinceYear:2005,color:'#cf4f5f'},
+  {id:'join-iwamoto',m:10,d:1,type:'join',category:'member',icon:'🌟',title:'岩本照さん 入所記念日',sinceYear:2006,color:'#f4c542'},
+  {id:'join-mukai',m:10,d:8,type:'join',category:'member',icon:'🌟',title:'向井康二さん 入所記念日',sinceYear:2006,color:'#e59a43'},
+  {id:'join-meguro',m:10,d:30,type:'join',category:'member',icon:'🌟',title:'目黒蓮さん 入所記念日',sinceYear:2010,color:'#30353a'}
 ];
 
 let fixedEvents = DEFAULT_FIXED_EVENTS;
@@ -330,8 +341,43 @@ function applyView(){
   document.getElementById('newBtn').classList.toggle('hidden',isCalendar);
 }
 
+function fixedEventMilestone(event,year){
+  if(!event.sinceYear) return '毎年の記念日';
+  const count = year - Number(event.sinceYear);
+  if(count < 0) return '';
+  if(event.type === 'birthday') return `${count}歳のお誕生日`;
+  return `${count}周年`;
+}
+
+function fixedEventLabel(event,year){
+  const milestone = fixedEventMilestone(event,year);
+  return `${event.icon || '⭐'} ${event.title || event.label || '記念日'}${milestone ? `（${milestone}）` : ''}`;
+}
+
 function calendarEvents(){
   const events = [];
+  const years = new Set();
+  const cursorYear = calendarCursor.getFullYear();
+
+  for(let year=cursorYear-1;year<=cursorYear+1;year+=1){
+    years.add(year);
+  }
+
+  fixedEvents.forEach(event=>{
+    years.forEach(year=>{
+      const date = new Date(year,Number(event.m)-1,Number(event.d));
+      events.push({
+        date:localDate(date),
+        kind:'official',
+        officialId:event.id || `${event.m}-${event.d}-${event.title || event.label}`,
+        title:`${event.icon || '⭐'} ${event.title || event.label || '記念日'}`,
+        typeLabel:'公式記念日',
+        typeIcon:event.icon || '⭐',
+        milestone:fixedEventMilestone(event,year),
+        color:event.color || DEFAULT_ACCENT
+      });
+    });
+  });
 
   state.projects
     .filter(p=>!p.archived)
@@ -339,6 +385,7 @@ function calendarEvents(){
       projectMilestones(p).forEach(m=>{
         events.push({
           date:localDate(m.date),
+          kind:'project',
           projectId:p.id,
           title:p.title,
           typeLabel:typeInfo(p).label,
@@ -351,6 +398,7 @@ function calendarEvents(){
 
   return events.sort((a,b)=>
     a.date.localeCompare(b.date) ||
+    (a.kind === b.kind ? 0 : a.kind === 'official' ? -1 : 1) ||
     a.title.localeCompare(b.title,'ja')
   );
 }
@@ -462,20 +510,40 @@ function renderSelectedCalendarDate(byDate){
     return;
   }
 
-  container.innerHTML = events.map(event=>`
-    <button
-      type="button"
-      class="calendar-event"
-      onclick="openDetailFromCalendar('${event.projectId}')"
-    >
-      <span class="calendar-event-dot" style="--dot-color:${event.color}"></span>
-      <span class="calendar-event-text">
-        <strong>${escapeHtml(event.title)}</strong>
-        <small>${escapeHtml(event.milestone)} ・ ${event.typeIcon} ${escapeHtml(event.typeLabel)}</small>
-      </span>
-      <span class="calendar-event-arrow">›</span>
-    </button>
-  `).join('');
+  container.innerHTML = events.map(event=>{
+    const detail = [event.milestone,`${event.typeIcon} ${event.typeLabel}`]
+      .filter(Boolean)
+      .map(escapeHtml)
+      .join(' ・ ');
+
+    if(event.kind === 'official'){
+      return `
+        <div class="calendar-event calendar-event-official">
+          <span class="calendar-event-dot" style="--dot-color:${event.color}"></span>
+          <span class="calendar-event-text">
+            <strong>${escapeHtml(event.title)}</strong>
+            <small>${detail}</small>
+          </span>
+          <span class="calendar-event-mark" aria-hidden="true">記念日</span>
+        </div>
+      `;
+    }
+
+    return `
+      <button
+        type="button"
+        class="calendar-event"
+        onclick="openDetailFromCalendar('${event.projectId}')"
+      >
+        <span class="calendar-event-dot" style="--dot-color:${event.color}"></span>
+        <span class="calendar-event-text">
+          <strong>${escapeHtml(event.title)}</strong>
+          <small>${detail}</small>
+        </span>
+        <span class="calendar-event-arrow">›</span>
+      </button>
+    `;
+  }).join('');
 }
 
 function moveCalendarMonth(amount){
@@ -523,7 +591,12 @@ function getTodayEvents(){
   const m = now.getMonth()+1;
   const d = now.getDate();
 
-  const fixed = fixedEvents.filter(e=>e.m===m && e.d===d);
+  const fixed = fixedEvents
+    .filter(e=>Number(e.m)===m && Number(e.d)===d)
+    .map(e=>({
+      ...e,
+      label:fixedEventLabel(e,now.getFullYear())
+    }));
   const project = [];
 
   state.projects
@@ -1412,7 +1485,21 @@ Promise.all([
   chartData = charts;
 
   if(calendar?.events && Array.isArray(calendar.events)){
-    fixedEvents = calendar.events;
+    const legacyExtras = calendar.events.filter(event=>
+      !DEFAULT_FIXED_EVENTS.some(defaultEvent=>
+        Number(defaultEvent.m)===Number(event.m) &&
+        Number(defaultEvent.d)===Number(event.d) &&
+        defaultEvent.type===event.type
+      )
+    );
+
+    fixedEvents = [...DEFAULT_FIXED_EVENTS,...legacyExtras.map((event,index)=>({
+      ...event,
+      id:event.id || `calendar-extra-${index}`,
+      icon:event.icon || (event.type==='birthday' ? '🎂' : '⭐'),
+      title:event.title || String(event.label || '記念日').replace(/^[^\p{L}\p{N}]+/u,'').trim(),
+      color:event.color || DEFAULT_ACCENT
+    }))];
   }
 
   render();
