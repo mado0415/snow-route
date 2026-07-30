@@ -370,9 +370,9 @@ function calendarEvents(){
         date:localDate(date),
         kind:'official',
         officialId:event.id || `${event.m}-${event.d}-${event.title || event.label}`,
-        title:`${event.icon || '⭐'} ${event.title || event.label || '記念日'}`,
+        title:event.title || event.label || '記念日',
         typeLabel:'公式記念日',
-        typeIcon:event.icon || '⭐',
+        typeIcon:'',
         milestone:fixedEventMilestone(event,year),
         color:event.color || DEFAULT_ACCENT
       });
@@ -444,7 +444,15 @@ function renderCalendar(){
     const key = localDate(cellDate);
     const dayEvents = byDate.get(key) || [];
     const dots = dayEvents.slice(0,3)
-      .map(e=>`<span class="calendar-dot" style="--dot-color:${e.color}"></span>`)
+      .map(e=>{
+        const markerClass = e.kind === 'official'
+          ? 'calendar-marker official'
+          : e.kind === 'personal'
+            ? 'calendar-marker personal'
+            : 'calendar-marker project';
+        const markerText = e.kind === 'official' ? '☆' : e.kind === 'personal' ? '◆' : '';
+        return `<span class="${markerClass}" style="--dot-color:${e.color}" aria-hidden="true">${markerText}</span>`;
+      })
       .join('');
     const more = dayEvents.length > 3
       ? `<span class="calendar-more">+</span>`
@@ -511,7 +519,8 @@ function renderSelectedCalendarDate(byDate){
   }
 
   container.innerHTML = events.map(event=>{
-    const detail = [event.milestone,`${event.typeIcon} ${event.typeLabel}`]
+    const typeDetail = [event.typeIcon,event.typeLabel].filter(Boolean).join(' ');
+    const detail = [event.milestone,typeDetail]
       .filter(Boolean)
       .map(escapeHtml)
       .join(' ・ ');
@@ -519,12 +528,11 @@ function renderSelectedCalendarDate(byDate){
     if(event.kind === 'official'){
       return `
         <div class="calendar-event calendar-event-official">
-          <span class="calendar-event-dot" style="--dot-color:${event.color}"></span>
+          <span class="calendar-event-symbol official" style="--dot-color:${event.color}" aria-hidden="true">☆</span>
           <span class="calendar-event-text">
             <strong>${escapeHtml(event.title)}</strong>
             <small>${detail}</small>
           </span>
-          <span class="calendar-event-mark" aria-hidden="true">記念日</span>
         </div>
       `;
     }
