@@ -1,5 +1,7 @@
 {
-  "updatedAt": "2026-07-30",
+  "schemaVersion": 1,
+  "updatedAt": "2026-07-31",
+  "validUntil": "2026-12-31",
   "years": {
     "2026": {
       "billboard": {
