@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#dceff7" />
   <meta name="description" content="Snow Manの作品やイベントを、あと何日と節目で管理するファンメイドツールです。" />
   <title>SNOW ROUTE</title>
-  <link rel="stylesheet" href="./style.css?v=0.3.7" />
+  <link rel="stylesheet" href="./style.css?v=1.0.1" />
 </head>
 <body>
 <main class="app">
@@ -24,6 +24,14 @@
     <button class="view-tab active" id="homeTabBtn" type="button">ホーム</button>
     <button class="view-tab" id="calendarTabBtn" type="button">カレンダー</button>
   </nav>
+
+  <section class="chart-data-notice hidden" id="chartDataNotice" role="status" aria-live="polite">
+    <div class="chart-data-notice-icon" aria-hidden="true">📅</div>
+    <div>
+      <strong id="chartDataNoticeTitle"></strong>
+      <p id="chartDataNoticeText"></p>
+    </div>
+  </section>
 
   <div id="homeView">
     <section class="special-box hidden" id="specialBox">
@@ -222,6 +230,19 @@
       <div class="switch-row"><div><strong>お祝い演出</strong><small>特別な日に数秒だけ雪を降らせます</small></div><input class="switch" id="effectInput" type="checkbox" checked /></div>
       <button class="primary full" id="saveSettingsBtn">設定を保存</button>
     </div>
+    <div class="panel chart-data-panel">
+      <h3 style="margin-top:0">チャート期間データ</h3>
+      <div class="chart-data-status" id="chartDataStatus">
+        <span class="chart-data-status-dot" aria-hidden="true"></span>
+        <strong id="chartDataStatusLabel">確認中…</strong>
+      </div>
+      <dl class="chart-data-meta">
+        <div><dt>対象年</dt><dd id="chartDataYears">—</dd></div>
+        <div><dt>最終更新</dt><dd id="chartDataUpdatedAt">—</dd></div>
+        <div><dt>確認期限</dt><dd id="chartDataValidUntil">—</dd></div>
+      </dl>
+      <p class="detail-muted chart-data-help">期限が近づくとホームにお知らせが表示されます。管理者がcalendar-periods.jsonを更新すると、利用者側にも自動で反映されます。</p>
+    </div>
     <div class="panel">
       <h3 style="margin-top:0">バックアップ</h3>
       <div class="btn-row"><button class="secondary" id="exportAllBtn">バックアップを保存</button><label class="secondary" style="display:inline-flex;align-items:center;margin:0">バックアップを読み込む<input class="hidden" id="importAllInput" type="file" accept="application/json,.json" /></label></div>
@@ -239,6 +260,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=0.3.7" defer></script>
+<script src="./script.js?v=1.0.1" defer></script>
 </body>
 </html>
