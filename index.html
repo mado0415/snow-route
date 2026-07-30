@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#dceff7" />
   <meta name="description" content="Snow Manの作品やイベントを、あと何日と節目で管理するファンメイドツールです。" />
   <title>SNOW ROUTE</title>
-  <link rel="stylesheet" href="./style.css?v=0.3.1" />
+  <link rel="stylesheet" href="./style.css?v=0.3.2" />
 </head>
 <body>
 <main class="app">
@@ -19,21 +19,52 @@
   </header>
 
   <div class="today-date" id="todayDate"></div>
-  <section class="special-box hidden" id="specialBox">
-    <h2>今日は…</h2>
-    <div id="specialList"></div>
-  </section>
 
-  <section id="heroSection" class="hidden">
-    <div class="section-head"><h2>📌 直近の節目</h2></div>
-    <article class="hero" id="heroCard"></article>
-  </section>
+  <nav class="view-tabs" aria-label="表示切り替え">
+    <button class="view-tab active" id="homeTabBtn" type="button">ホーム</button>
+    <button class="view-tab" id="calendarTabBtn" type="button">カレンダー</button>
+  </nav>
 
-  <div class="section-head">
-    <h2>📅 これからの節目</h2>
-    <button class="text-btn" id="archiveBtn">アーカイブ <span id="archiveCount">0</span></button>
+  <div id="homeView">
+    <section class="special-box hidden" id="specialBox">
+      <h2>今日は…</h2>
+      <div id="specialList"></div>
+    </section>
+
+    <section id="heroSection" class="hidden">
+      <div class="section-head"><h2>📌 直近の節目</h2></div>
+      <article class="hero" id="heroCard"></article>
+    </section>
+
+    <div class="section-head">
+      <h2>📅 これからの節目</h2>
+      <button class="text-btn" id="archiveBtn">アーカイブ <span id="archiveCount">0</span></button>
+    </div>
+    <section class="cards" id="projectList"></section>
   </div>
-  <section class="cards" id="projectList"></section>
+
+  <section class="calendar-view hidden" id="calendarView">
+    <div class="calendar-panel">
+      <div class="calendar-toolbar">
+        <button class="calendar-arrow" id="prevMonthBtn" type="button" aria-label="前の月">‹</button>
+        <button class="calendar-month-title" id="calendarMonthTitle" type="button" aria-label="今月に戻る"></button>
+        <button class="calendar-arrow" id="nextMonthBtn" type="button" aria-label="次の月">›</button>
+      </div>
+      <div class="calendar-weekdays" aria-hidden="true">
+        <span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+      <p class="calendar-hint">色の丸が、登録したプロジェクトの節目です。月名を押すと今月に戻ります。</p>
+    </div>
+
+    <div class="calendar-day-panel">
+      <div class="calendar-day-head">
+        <h2 id="selectedDateTitle"></h2>
+        <span id="selectedDateCount"></span>
+      </div>
+      <div id="selectedDateEvents"></div>
+    </div>
+  </section>
 </main>
 
 <button class="fab" id="newBtn">＋ 新しいプロジェクト</button>
@@ -210,6 +241,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=0.3.1" defer></script>
+<script src="./script.js?v=0.3.2" defer></script>
 </body>
 </html>
