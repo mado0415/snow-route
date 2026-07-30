@@ -733,7 +733,6 @@ input[type="date"] {
   }
 }
 
-
 /* v0.2.3 chart estimate notice */
 .chart-estimate-note {
   margin: 0 0 12px;
@@ -757,7 +756,6 @@ body.dark .chart-estimate-note {
   border-color: #665a2f;
   color: #eadb9a;
 }
-
 
 /* v0.2.4: compact iPhone date field and section wording */
 .field-grid {
@@ -846,7 +844,6 @@ body.dark .chart-estimate-note {
   }
 }
 
-
 /* v0.3.0 milestone editor */
 .milestone-section-head,
 .custom-milestone-head {
@@ -906,7 +903,6 @@ body.dark .chart-estimate-note {
   }
 }
 
-
 /* v0.3.1 アクセントカラー初期化 */
 .reset-accent-btn {
   display:inline-flex;
@@ -927,7 +923,6 @@ body.dark .chart-estimate-note {
 .reset-accent-btn:active {
   opacity:.65;
 }
-
 
 /* v0.3.2 カレンダー */
 .view-tabs {
@@ -1236,8 +1231,6 @@ body.dark .chart-estimate-note {
   cursor:default;
 }
 
-
-
 body.dark .view-tab.active {
   background:color-mix(in srgb, var(--card) 86%, white);
 }
@@ -1260,5 +1253,148 @@ body.dark .view-tab.active {
 
   .calendar-marker.official {
     font-size:10px;
+  }
+}
+
+/* v0.3.4 今ここ・縦型ルート */
+.route-panel h3 {
+  margin-top:0;
+  margin-bottom:18px;
+}
+
+.route-list {
+  position:relative;
+}
+
+.route-item {
+  position:relative;
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr) auto;
+  align-items:center;
+  min-height:66px;
+}
+
+.route-item:not(:last-child)::after {
+  content:"";
+  position:absolute;
+  top:41px;
+  bottom:-25px;
+  left:16px;
+  width:2px;
+  background:color-mix(in srgb, var(--accent-strong) 25%, var(--line));
+}
+
+.route-marker {
+  position:relative;
+  z-index:1;
+  display:flex;
+  justify-content:flex-start;
+  align-items:center;
+}
+
+.route-marker span {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  background:var(--card);
+  font-size:16px;
+  font-weight:700;
+  box-sizing:border-box;
+}
+
+.route-content {
+  min-width:0;
+  padding:8px 10px 8px 12px;
+}
+
+.route-content strong {
+  display:block;
+  line-height:1.45;
+}
+
+.route-content small {
+  display:block;
+  margin-top:3px;
+  color:var(--sub);
+  font-size:12px;
+}
+
+.route-distance {
+  padding-left:8px;
+  color:var(--sub);
+  font-size:12px;
+  white-space:nowrap;
+}
+
+.route-past .route-marker span {
+  color:var(--accent-strong);
+  border:2px solid var(--accent-strong);
+}
+
+.route-past .route-content {
+  opacity:.68;
+}
+
+.route-future .route-marker span {
+  border:2px solid color-mix(in srgb, var(--sub) 38%, transparent);
+  color:var(--sub);
+}
+
+.route-today .route-marker span {
+  color:#fff;
+  border:2px solid var(--accent-strong);
+  background:var(--accent-strong);
+}
+
+.route-today .route-content strong,
+.route-today .route-distance {
+  color:var(--accent-strong);
+  font-weight:700;
+}
+
+.route-current-position {
+  min-height:58px;
+}
+
+.route-current-position .route-marker span {
+  width:28px;
+  height:28px;
+  margin-left:3px;
+  color:#fff;
+  border:2px solid var(--accent-strong);
+  background:var(--accent-strong);
+  font-size:12px;
+}
+
+.route-current-position .route-content strong {
+  color:var(--accent-strong);
+}
+
+.route-empty {
+  padding:14px 0;
+  color:var(--sub);
+  text-align:center;
+}
+
+@media (max-width:420px) {
+  .route-item {
+    grid-template-columns:32px minmax(0,1fr);
+  }
+
+  .route-distance {
+    grid-column:2;
+    padding:0 10px 8px 12px;
+  }
+
+  .route-item:not(:last-child)::after {
+    left:15px;
+  }
+
+  .route-marker span {
+    width:32px;
+    height:32px;
   }
 }
