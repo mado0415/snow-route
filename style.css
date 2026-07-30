@@ -757,3 +757,91 @@ body.dark .chart-estimate-note {
   border-color: #665a2f;
   color: #eadb9a;
 }
+
+
+/* v0.2.4: compact iPhone date field and section wording */
+.field-grid {
+  display:grid;
+  grid-template-columns:minmax(0, .88fr) minmax(0, 1.12fr);
+  gap:12px;
+  align-items:start;
+}
+
+.field-grid > .field {
+  min-width:0;
+  margin-bottom:15px;
+}
+
+.field-grid select {
+  width:100%;
+  min-width:0;
+  height:48px;
+  padding-top:8px;
+  padding-bottom:8px;
+}
+
+.date-field {
+  min-width:0;
+}
+
+.date-input-wrap {
+  width:100%;
+  min-width:0;
+  height:48px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--card);
+}
+
+.date-input-wrap:focus-within {
+  border-color:var(--accent-strong);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+.date-input-wrap input[type="date"] {
+  display:block;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  height:46px;
+  margin:0;
+  padding:0 8px;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  font-size:16px;
+  line-height:46px;
+  text-align:center;
+  -webkit-appearance:none;
+  appearance:none;
+}
+
+.date-input-wrap input[type="date"]:focus {
+  border:0;
+  box-shadow:none;
+}
+
+.date-input-wrap input[type="date"]::-webkit-date-and-time-value {
+  min-width:0;
+  padding:0;
+  text-align:center;
+}
+
+.date-input-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+  margin:0;
+  padding:0 2px;
+}
+
+@media (max-width:380px) {
+  .field-grid {
+    grid-template-columns:minmax(0, .82fr) minmax(0, 1.18fr);
+    gap:10px;
+  }
+
+  .field-grid select,
+  .date-input-wrap input[type="date"] {
+    font-size:15px;
+  }
+}
