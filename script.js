@@ -450,7 +450,7 @@ function renderCalendar(){
           : e.kind === 'personal'
             ? 'calendar-marker personal'
             : 'calendar-marker project';
-        const markerText = e.kind === 'official' ? '☆' : e.kind === 'personal' ? '◆' : '';
+        const markerText = e.kind === 'official' ? '★' : e.kind === 'personal' ? '◆' : '';
         return `<span class="${markerClass}" style="--dot-color:${e.color}" aria-hidden="true">${markerText}</span>`;
       })
       .join('');
@@ -528,7 +528,7 @@ function renderSelectedCalendarDate(byDate){
     if(event.kind === 'official'){
       return `
         <div class="calendar-event calendar-event-official">
-          <span class="calendar-event-symbol official" style="--dot-color:${event.color}" aria-hidden="true">☆</span>
+          <span class="calendar-event-symbol official" style="--dot-color:${event.color}" aria-hidden="true">★</span>
           <span class="calendar-event-text">
             <strong>${escapeHtml(event.title)}</strong>
             <small>${detail}</small>
