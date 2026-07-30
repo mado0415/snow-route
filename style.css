@@ -845,3 +845,63 @@ body.dark .chart-estimate-note {
     font-size:15px;
   }
 }
+
+
+/* v0.3.0 milestone editor */
+.milestone-section-head,
+.custom-milestone-head {
+  margin:0 0 6px;
+  align-items:center;
+}
+
+.custom-milestones-block {
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid var(--line);
+}
+
+.milestone-editor {
+  padding:13px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  margin-bottom:10px;
+  background:color-mix(in srgb, var(--card) 92%, var(--bg));
+}
+
+.milestone-editor-grid {
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) minmax(0, 1fr);
+  gap:10px;
+}
+
+.milestone-editor .field {
+  min-width:0;
+  margin-bottom:10px;
+}
+
+.milestone-editor input[type="date"] {
+  min-width:0;
+  height:46px;
+}
+
+.milestone-message-field {
+  margin-bottom:2px !important;
+}
+
+.optional-label {
+  color:var(--sub);
+  font-size:11px;
+  font-weight:400;
+}
+
+.milestone-editor-actions {
+  display:flex;
+  justify-content:flex-end;
+}
+
+@media (max-width:380px) {
+  .milestone-editor-grid {
+    grid-template-columns:1fr;
+    gap:0;
+  }
+}
