@@ -48,7 +48,6 @@ a { color: inherit; }
 .badges { display:flex; flex-wrap:wrap; gap:7px; margin-top:12px; }
 .badge { display:inline-flex; align-items:center; min-height:27px; padding:4px 9px; border-radius:999px; background:var(--bg); color:var(--sub); font-size:12px; }
 .badge.hot { background:#fff1e7; color:#995a23; }
-.badge.pin { background:#fff7cd; color:#786014; }
 .quick-links { display:flex; flex-wrap:wrap; gap:8px; margin-top:15px; }
 .link-chip { text-decoration:none; border:1px solid var(--line); border-radius:999px; padding:8px 12px; background:var(--card); font-size:13px; }
 .cards { display:grid; gap:11px; }
@@ -114,3 +113,24 @@ body.dark .link-chip, body.dark input, body.dark select, body.dark textarea { ba
   .modal { border-radius:28px; max-height:90vh; }
   .link-editor { grid-template-columns:1fr 1.5fr; }
 }
+
+/* v0.2 UI adjustments */
+.card-pin {
+  position:absolute;
+  top:12px;
+  right:13px;
+  z-index:2;
+  font-size:17px;
+  line-height:1;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.08));
+}
+.hero .card-pin { top:17px; right:18px; font-size:19px; }
+.detail-summary { position:relative; }
+.detail-summary .card-pin { top:15px; right:16px; }
+.hero-target { margin-bottom:7px; font-weight:700; color:var(--text); }
+.field-help { margin:-2px 0 12px; color:var(--sub); font-size:12px; line-height:1.55; }
+.chart-note { margin:-5px 0 8px; font-size:12px; line-height:1.55; }
+.chart-row strong { font-weight:700; }
+.card-count strong.compact-count { font-size:18px; white-space:nowrap; }
+.card:has(.card-pin) { padding-right:44px; }
+.hero:has(.card-pin) { padding-right:54px; }
