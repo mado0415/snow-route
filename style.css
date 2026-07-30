@@ -1091,16 +1091,33 @@ body.dark .chart-estimate-note {
   margin:0;
 }
 
-.calendar-dot,
-.calendar-event-dot {
-  background:var(--dot-color,var(--accent-strong));
-  border:1px solid color-mix(in srgb, var(--dot-color,var(--accent-strong)) 72%, #67737b);
+.calendar-marker {
+  display:inline-grid;
+  place-items:center;
+  flex:0 0 auto;
 }
 
-.calendar-dot {
+.calendar-marker.project {
   width:7px;
   height:7px;
+  border:1px solid color-mix(in srgb, var(--dot-color,var(--accent-strong)) 72%, #67737b);
   border-radius:50%;
+  background:var(--dot-color,var(--accent-strong));
+}
+
+.calendar-marker.official,
+.calendar-marker.personal {
+  width:9px;
+  height:9px;
+  color:var(--dot-color,var(--accent-strong));
+  font-family:Arial, sans-serif;
+  font-size:11px;
+  font-weight:700;
+  line-height:1;
+}
+
+.calendar-marker.personal {
+  font-size:8px;
 }
 
 .calendar-more {
@@ -1147,7 +1164,7 @@ body.dark .chart-estimate-note {
 
 .calendar-event {
   display:grid;
-  grid-template-columns:13px minmax(0,1fr) auto;
+  grid-template-columns:16px minmax(0,1fr) auto;
   align-items:center;
   gap:10px;
   width:100%;
@@ -1166,7 +1183,24 @@ body.dark .chart-estimate-note {
 .calendar-event-dot {
   width:11px;
   height:11px;
+  border:1px solid color-mix(in srgb, var(--dot-color,var(--accent-strong)) 72%, #67737b);
   border-radius:50%;
+  background:var(--dot-color,var(--accent-strong));
+}
+
+.calendar-event-symbol {
+  display:grid;
+  place-items:center;
+  width:16px;
+  color:var(--dot-color,var(--accent-strong));
+  font-family:Arial, sans-serif;
+  font-size:20px;
+  font-weight:700;
+  line-height:1;
+}
+
+.calendar-event-symbol.personal {
+  font-size:14px;
 }
 
 .calendar-event-text {
@@ -1196,15 +1230,7 @@ body.dark .chart-estimate-note {
   cursor:default;
 }
 
-.calendar-event-mark {
-  padding:4px 7px;
-  border:1px solid var(--line);
-  border-radius:999px;
-  color:var(--sub);
-  font-size:10px;
-  font-weight:800;
-  white-space:nowrap;
-}
+
 
 body.dark .view-tab.active {
   background:color-mix(in srgb, var(--card) 86%, white);
@@ -1215,8 +1241,18 @@ body.dark .view-tab.active {
     min-height:52px;
   }
 
-  .calendar-dot {
+  .calendar-marker.project {
     width:6px;
     height:6px;
+  }
+
+  .calendar-marker.official,
+  .calendar-marker.personal {
+    width:8px;
+    height:8px;
+  }
+
+  .calendar-marker.official {
+    font-size:10px;
   }
 }
