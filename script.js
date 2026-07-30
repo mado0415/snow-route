@@ -76,6 +76,7 @@ let currentDetailId = null;
 let currentView = 'home';
 let calendarCursor = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 let selectedCalendarDate = localDate();
+let pendingSharedProject = null;
 
 function defaultState(){
   return {
@@ -1063,6 +1064,15 @@ function openDetail(id){
       </div>
     ` : ''}
 
+    <div class="panel share-panel">
+      <h3>プロジェクトを共有</h3>
+      <p class="detail-muted share-note">URLはSNSで共有できます。JSONは保存・受け渡し用です。</p>
+      <div class="share-actions">
+        <button class="primary" onclick="shareProjectUrl('${p.id}')">🔗 共有URL</button>
+        <button class="secondary" onclick="exportProject('${p.id}')">💾 JSONとして保存</button>
+      </div>
+    </div>
+
     <div class="btn-row">
       <button class="primary" onclick="closeModal('detailModal');openEditor('${p.id}')">編集</button>
       <button class="secondary" onclick="archiveProject('${p.id}')">アーカイブ</button>
@@ -1289,6 +1299,168 @@ function exportProject(id){
   }
 }
 
+
+function projectSharePayload(p){
+  return {
+    dataVersion:1,
+    kind:'snow-route-project',
+    project:{
+      ...p,
+      id:'',
+      pinned:false,
+      archived:false,
+      createdAt:'',
+      updatedAt:''
+    }
+  };
+}
+
+function encodeShareData(data){
+  const bytes = new TextEncoder().encode(JSON.stringify(data));
+  let binary = '';
+  bytes.forEach(byte=>{ binary += String.fromCharCode(byte); });
+  return btoa(binary)
+    .replace(/\+/g,'-')
+    .replace(/\//g,'_')
+    .replace(/=+$/,'');
+}
+
+function decodeShareData(value){
+  const normalized = value.replace(/-/g,'+').replace(/_/g,'/');
+  const padded = normalized + '='.repeat((4 - normalized.length % 4) % 4);
+  const binary = atob(padded);
+  const bytes = Uint8Array.from(binary,char=>char.charCodeAt(0));
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
+async function shareProjectUrl(id){
+  const p = state.projects.find(x=>x.id===id);
+  if(!p) return;
+
+  const url = new URL(window.location.href);
+  url.search = '';
+  url.hash = '';
+  url.searchParams.set('share',encodeShareData(projectSharePayload(p)));
+
+  const shareData = {
+    title:`SNOW ROUTE｜${p.title}`,
+    text:`「${p.title}」のSNOW ROUTEプロジェクト`,
+    url:url.toString()
+  };
+
+  try{
+    if(navigator.share){
+      await navigator.share(shareData);
+      return;
+    }
+
+    await navigator.clipboard.writeText(url.toString());
+    alert('共有URLをコピーしました。');
+  }catch(error){
+    if(error?.name === 'AbortError') return;
+
+    try{
+      await navigator.clipboard.writeText(url.toString());
+      alert('共有URLをコピーしました。');
+    }catch(copyError){
+      prompt('共有URLをコピーしてください。',url.toString());
+    }
+  }
+}
+
+function clearShareParameter(){
+  const url = new URL(window.location.href);
+  if(!url.searchParams.has('share')) return;
+  url.searchParams.delete('share');
+  history.replaceState(null,'',`${url.pathname}${url.search}${url.hash}`);
+}
+
+function sharedProjectSummary(p){
+  const customCount = (p.customMilestones || []).filter(m=>m?.label && m?.date).length;
+  const linkCount = (p.links || []).filter(l=>l?.url).length;
+
+  return [
+    customCount ? `独自の節目 ${customCount}件` : '',
+    linkCount ? `リンク ${linkCount}件` : ''
+  ].filter(Boolean).join(' ・ ');
+}
+
+function showSharedProjectPreview(project){
+  if(!project?.title || !project?.baseDate){
+    alert('共有プロジェクトのデータを確認できませんでした。');
+    clearShareParameter();
+    return;
+  }
+
+  pendingSharedProject = project;
+  const summary = sharedProjectSummary(project);
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="panel shared-preview" style="border-left:7px solid ${memberColor(project)}">
+      <div class="detail-muted">共有されたプロジェクト</div>
+      <h2>${typeInfo(project).icon} ${escapeHtml(project.title)}</h2>
+      <div class="shared-project-date">${fmt(parseDate(project.baseDate))}</div>
+      <div class="detail-muted">${escapeHtml(typeInfo(project).label)}</div>
+      ${summary ? `<p class="shared-project-summary">${escapeHtml(summary)}</p>` : ''}
+      ${project.memo ? `<p class="shared-project-memo">${escapeHtml(project.memo).replace(/\n/g,'<br>')}</p>` : ''}
+    </div>
+
+    <div class="panel">
+      <h3>自分のSNOW ROUTEに追加しますか？</h3>
+      <p class="detail-muted share-note">現在の登録内容は消えません。新しいプロジェクトとして追加されます。</p>
+      <div class="share-actions">
+        <button class="primary" onclick="addSharedProject()">追加する</button>
+        <button class="secondary" onclick="cancelSharedProject()">キャンセル</button>
+      </div>
+    </div>
+  `;
+
+  openModal('detailModal');
+}
+
+function addSharedProject(){
+  if(!pendingSharedProject) return;
+
+  const now = new Date().toISOString();
+  state.projects.push({
+    ...pendingSharedProject,
+    id:uid('project'),
+    pinned:false,
+    archived:false,
+    createdAt:now,
+    updatedAt:now
+  });
+
+  pendingSharedProject = null;
+  clearShareParameter();
+  saveState();
+  closeModal('detailModal');
+  render();
+  alert('プロジェクトを追加しました。');
+}
+
+function cancelSharedProject(){
+  pendingSharedProject = null;
+  clearShareParameter();
+  closeModal('detailModal');
+}
+
+function handleIncomingShare(){
+  const value = new URL(window.location.href).searchParams.get('share');
+  if(!value) return;
+
+  try{
+    const data = decodeShareData(value);
+    if(data?.kind !== 'snow-route-project' || !data?.project){
+      throw new Error('形式が違います');
+    }
+    showSharedProjectPreview(data.project);
+  }catch(error){
+    clearShareParameter();
+    alert('共有URLを読み込めませんでした。URLが途中で切れていないか確認してください。');
+  }
+}
+
 function exportAll(){
   downloadJson(state,`snow-route-backup-${localDate()}.json`);
 }
@@ -1296,6 +1468,12 @@ function exportAll(){
 async function importAll(file){
   try{
     const data = JSON.parse(await file.text());
+
+    if(data?.kind === 'snow-route-project' && data?.project){
+      closeModal('settingsModal');
+      showSharedProjectPreview(data.project);
+      return;
+    }
 
     if(!data || !Array.isArray(data.projects)){
       throw new Error('形式が違います');
@@ -1354,6 +1532,9 @@ window.archiveProject = archiveProject;
 window.restoreProject = restoreProject;
 window.deleteProject = deleteProject;
 window.exportProject = exportProject;
+window.shareProjectUrl = shareProjectUrl;
+window.addSharedProject = addSharedProject;
+window.cancelSharedProject = cancelSharedProject;
 
 populateMembers();
 
@@ -1382,4 +1563,5 @@ Promise.all([
   }
 
   render();
+  handleIncomingShare();
 });
