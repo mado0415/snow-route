@@ -13,6 +13,7 @@ const TYPE = {
 };
 
 const DEFAULT_MILESTONE_VISIBILITY = {
+  firstWeek:true,
   day30:true,
   day100:true,
   half:true,
@@ -174,6 +175,11 @@ function typeInfo(p){
   return TYPE[p.type] || TYPE.event;
 }
 
+function firstWeekEndDate(base){
+  const daysUntilSunday = (7 - base.getDay()) % 7;
+  return addDays(base,daysUntilSunday);
+}
+
 function projectMilestones(p){
   const base = parseDate(p.baseDate);
   const now = parseDate(localDate());
@@ -201,6 +207,14 @@ function projectMilestones(p){
   });
 
   if(p.type!=='event'){
+    if(visibility.firstWeek){
+      list.push({
+        key:'firstWeek',
+        label:'初週最終日',
+        date:firstWeekEndDate(base),
+        special:'📊 初週集計 最終日！'
+      });
+    }
     if(visibility.day30){
       list.push({key:'30',label:'30日',date:addDays(base,30),special:'🎉 リリース30日！'});
     }
@@ -858,6 +872,7 @@ function openEditor(id=''){
   document.getElementById('afterLabelInput').value = p?.afterLabel || '';
 
   const visibility = {...DEFAULT_MILESTONE_VISIBILITY,...(p?.milestoneVisibility || {})};
+  document.getElementById('milestoneFirstWeekInput').checked = visibility.firstWeek;
   document.getElementById('milestone30Input').checked = visibility.day30;
   document.getElementById('milestone100Input').checked = visibility.day100;
   document.getElementById('milestoneHalfInput').checked = visibility.half;
@@ -997,6 +1012,7 @@ document.getElementById('projectForm').addEventListener('submit',e=>{
     eventMessage:document.getElementById('messageInput').value.trim() || defaultMessage(type),
     afterLabel:document.getElementById('afterLabelInput').value.trim() || TYPE[type].after,
     milestoneVisibility:{
+      firstWeek:document.getElementById('milestoneFirstWeekInput').checked,
       day30:document.getElementById('milestone30Input').checked,
       day100:document.getElementById('milestone100Input').checked,
       half:document.getElementById('milestoneHalfInput').checked,
