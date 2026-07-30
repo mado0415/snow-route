@@ -1,6 +1,6 @@
-'use strict';
+"use strict";
 const STORAGE_KEY = 'snowRouteDataV1';
-const CHART_URL = './chart-periods.json';
+const CHART_URL = './calendar-periods.json';
 const CALENDAR_URL = './calendar.json';
 const DEFAULT_ACCENT = '#5aa9ca';
 
@@ -49,7 +49,6 @@ const LEGACY_COLOR_KEYS = {
 const DEFAULT_FIXED_EVENTS = [
   {id:'group-debut',m:1,d:22,type:'anniversary',category:'group',icon:'⛄️',title:'Snow Man デビュー記念日',sinceYear:2020,color:'#9bcce0'},
   {id:'group-formation',m:5,d:3,type:'anniversary',category:'group',icon:'❄️',title:'Snow Man 結成記念日',sinceYear:2012,color:'#9bcce0'},
-
   {id:'birthday-meguro',m:2,d:16,type:'birthday',category:'member',icon:'🎂',title:'目黒蓮さんのお誕生日',sinceYear:1997,color:'#30353a'},
   {id:'birthday-miyadate',m:3,d:25,type:'birthday',category:'member',icon:'🎂',title:'宮舘涼太さんのお誕生日',sinceYear:1993,color:'#cf4f5f'},
   {id:'birthday-fukazawa',m:5,d:5,type:'birthday',category:'member',icon:'🎂',title:'深澤辰哉さんのお誕生日',sinceYear:1992,color:'#8a69b8'},
@@ -59,7 +58,6 @@ const DEFAULT_FIXED_EVENTS = [
   {id:'birthday-sakuma',m:7,d:5,type:'birthday',category:'member',icon:'🎂',title:'佐久間大介さんのお誕生日',sinceYear:1992,color:'#e88dbb'},
   {id:'birthday-watanabe',m:11,d:5,type:'birthday',category:'member',icon:'🎂',title:'渡辺翔太さんのお誕生日',sinceYear:1992,color:'#4c86d9'},
   {id:'birthday-abe',m:11,d:27,type:'birthday',category:'member',icon:'🎂',title:'阿部亮平さんのお誕生日',sinceYear:1993,color:'#55a86c'},
-
   {id:'join-raul',m:5,d:2,type:'join',category:'member',icon:'🌟',title:'ラウールさん 入所記念日',sinceYear:2015,color:'#f2f2f2'},
   {id:'join-watanabe',m:6,d:26,type:'join',category:'member',icon:'🌟',title:'渡辺翔太さん 入所記念日',sinceYear:2005,color:'#4c86d9'},
   {id:'join-fukazawa',m:8,d:12,type:'join',category:'member',icon:'🌟',title:'深澤辰哉さん 入所記念日',sinceYear:2004,color:'#8a69b8'},
@@ -286,16 +284,82 @@ function displayStatus(p){
   };
 }
 
+function routeHtml(p){
+  const milestones = projectMilestones(p);
+  const today = parseDate(localDate());
+
+  if(!milestones.length){
+    return '<div class="route-empty">表示できる節目がありません。</div>';
+  }
+
+  const hasTodayMilestone = milestones.some(m=>m.diff===0);
+  const rows = [];
+  let currentInserted = false;
+
+  milestones.forEach(m=>{
+    if(!hasTodayMilestone && !currentInserted && m.diff>0){
+      rows.push(`
+        <div class="route-item route-current-position">
+          <div class="route-marker"><span>◆</span></div>
+          <div class="route-content">
+            <strong>今ここ</strong>
+            <small>${fmt(today)}</small>
+          </div>
+        </div>
+      `);
+      currentInserted = true;
+    }
+
+    const statusClass = m.diff<0
+      ? 'route-past'
+      : m.diff===0
+        ? 'route-today'
+        : 'route-future';
+
+    const marker = m.diff<0 ? '✓' : m.diff===0 ? '●' : '○';
+
+    const distanceText = m.diff===0
+      ? '今日・今ここ'
+      : m.diff===1
+        ? '明日'
+        : m.diff>1
+          ? `あと${m.diff}日`
+          : `${Math.abs(m.diff)}日前`;
+
+    rows.push(`
+      <div class="route-item ${statusClass}">
+        <div class="route-marker"><span>${marker}</span></div>
+        <div class="route-content">
+          <strong>${escapeHtml(m.label)}</strong>
+          <small>${fmt(m.date)}</small>
+        </div>
+        <div class="route-distance">${escapeHtml(distanceText)}</div>
+      </div>
+    `);
+  });
+
+  if(!hasTodayMilestone && !currentInserted){
+    rows.push(`
+      <div class="route-item route-current-position">
+        <div class="route-marker"><span>◆</span></div>
+        <div class="route-content">
+          <strong>今ここ</strong>
+          <small>${fmt(today)}</small>
+        </div>
+      </div>
+    `);
+  }
+
+  return `<div class="route-list">${rows.join('')}</div>`;
+}
+
 function sortedProjects(list){
   return [...list].sort((a,b)=>{
     if(!!a.pinned!==!!b.pinned) return a.pinned ? -1 : 1;
-
     const sa = displayStatus(a);
     const sb = displayStatus(b);
-
     if(sa.kind==='special' && sb.kind!=='special') return -1;
     if(sb.kind==='special' && sa.kind!=='special') return 1;
-
     return sa.diff-sb.diff;
   });
 }
@@ -303,12 +367,8 @@ function sortedProjects(list){
 function render(){
   applySettings();
   renderToday();
-
   const active = sortedProjects(state.projects.filter(p=>!p.archived));
-
-  document.getElementById('archiveCount').textContent =
-    state.projects.filter(p=>p.archived).length;
-
+  document.getElementById('archiveCount').textContent = state.projects.filter(p=>p.archived).length;
   renderHero(active);
   renderCards(active);
   renderArchive();
@@ -317,23 +377,19 @@ function render(){
   maybeDailyOpening(active);
 }
 
-
 function setView(view){
   currentView = view === 'calendar' ? 'calendar' : 'home';
-
   if(currentView === 'calendar'){
     const selected = parseDate(selectedCalendarDate);
     calendarCursor = new Date(selected.getFullYear(), selected.getMonth(), 1);
     renderCalendar();
   }
-
   applyView();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function applyView(){
   const isCalendar = currentView === 'calendar';
-
   document.getElementById('homeView').classList.toggle('hidden',isCalendar);
   document.getElementById('calendarView').classList.toggle('hidden',!isCalendar);
   document.getElementById('homeTabBtn').classList.toggle('active',!isCalendar);
@@ -379,22 +435,20 @@ function calendarEvents(){
     });
   });
 
-  state.projects
-    .filter(p=>!p.archived)
-    .forEach(p=>{
-      projectMilestones(p).forEach(m=>{
-        events.push({
-          date:localDate(m.date),
-          kind:'project',
-          projectId:p.id,
-          title:p.title,
-          typeLabel:typeInfo(p).label,
-          typeIcon:typeInfo(p).icon,
-          milestone:m.label,
-          color:memberColor(p)
-        });
+  state.projects.filter(p=>!p.archived).forEach(p=>{
+    projectMilestones(p).forEach(m=>{
+      events.push({
+        date:localDate(m.date),
+        kind:'project',
+        projectId:p.id,
+        title:p.title,
+        typeLabel:typeInfo(p).label,
+        typeIcon:typeInfo(p).icon,
+        milestone:m.label,
+        color:memberColor(p)
       });
     });
+  });
 
   return events.sort((a,b)=>
     a.date.localeCompare(b.date) ||
@@ -415,8 +469,7 @@ function renderCalendar(){
     byDate.get(event.date).push(event);
   });
 
-  document.getElementById('calendarMonthTitle').textContent =
-    `${year}年${month+1}月`;
+  document.getElementById('calendarMonthTitle').textContent = `${year}年${month+1}月`;
 
   const firstWeekday = new Date(year,month,1).getDay();
   const lastDate = new Date(year,month+1,0).getDate();
@@ -443,20 +496,16 @@ function renderCalendar(){
 
     const key = localDate(cellDate);
     const dayEvents = byDate.get(key) || [];
-    const dots = dayEvents.slice(0,3)
-      .map(e=>{
-        const markerClass = e.kind === 'official'
-          ? 'calendar-marker official'
-          : e.kind === 'personal'
-            ? 'calendar-marker personal'
-            : 'calendar-marker project';
-        const markerText = e.kind === 'official' ? '★' : e.kind === 'personal' ? '◆' : '';
-        return `<span class="${markerClass}" style="--dot-color:${e.color}" aria-hidden="true">${markerText}</span>`;
-      })
-      .join('');
-    const more = dayEvents.length > 3
-      ? `<span class="calendar-more">+</span>`
-      : '';
+    const dots = dayEvents.slice(0,3).map(e=>{
+      const markerClass = e.kind === 'official'
+        ? 'calendar-marker official'
+        : e.kind === 'personal'
+          ? 'calendar-marker personal'
+          : 'calendar-marker project';
+      const markerText = e.kind === 'official' ? '★' : e.kind === 'personal' ? '◆' : '';
+      return `<span class="${markerClass}" style="--dot-color:${e.color}" aria-hidden="true">${markerText}</span>`;
+    }).join('');
+    const more = dayEvents.length > 3 ? '<span class="calendar-more">+</span>' : '';
 
     cells.push(`
       <button
@@ -481,14 +530,9 @@ function renderCalendar(){
     button.onclick = ()=>{
       selectedCalendarDate = button.dataset.calendarDate;
       const date = parseDate(selectedCalendarDate);
-
-      if(
-        date.getFullYear() !== calendarCursor.getFullYear() ||
-        date.getMonth() !== calendarCursor.getMonth()
-      ){
+      if(date.getFullYear() !== calendarCursor.getFullYear() || date.getMonth() !== calendarCursor.getMonth()){
         calendarCursor = new Date(date.getFullYear(),date.getMonth(),1);
       }
-
       renderCalendar();
     };
   });
@@ -504,26 +548,18 @@ function renderSelectedCalendarDate(byDate){
   document.getElementById('selectedDateTitle').textContent =
     selectedCalendarDate === localDate() ? `${title}（今日）` : title;
 
-  document.getElementById('selectedDateCount').textContent =
-    events.length ? `${events.length}件` : '';
+  document.getElementById('selectedDateCount').textContent = events.length ? `${events.length}件` : '';
 
   const container = document.getElementById('selectedDateEvents');
 
   if(!events.length){
-    container.innerHTML = `
-      <div class="calendar-empty">
-        この日に登録されている節目はありません。
-      </div>
-    `;
+    container.innerHTML = '<div class="calendar-empty">この日に登録されている節目はありません。</div>';
     return;
   }
 
   container.innerHTML = events.map(event=>{
     const typeDetail = [event.typeIcon,event.typeLabel].filter(Boolean).join(' ');
-    const detail = [event.milestone,typeDetail]
-      .filter(Boolean)
-      .map(escapeHtml)
-      .join(' ・ ');
+    const detail = [event.milestone,typeDetail].filter(Boolean).map(escapeHtml).join(' ・ ');
 
     if(event.kind === 'official'){
       return `
@@ -538,11 +574,7 @@ function renderSelectedCalendarDate(byDate){
     }
 
     return `
-      <button
-        type="button"
-        class="calendar-event"
-        onclick="openDetailFromCalendar('${event.projectId}')"
-      >
+      <button type="button" class="calendar-event" onclick="openDetailFromCalendar('${event.projectId}')">
         <span class="calendar-event-dot" style="--dot-color:${event.color}"></span>
         <span class="calendar-event-text">
           <strong>${escapeHtml(event.title)}</strong>
@@ -555,11 +587,7 @@ function renderSelectedCalendarDate(byDate){
 }
 
 function moveCalendarMonth(amount){
-  calendarCursor = new Date(
-    calendarCursor.getFullYear(),
-    calendarCursor.getMonth()+amount,
-    1
-  );
+  calendarCursor = new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+amount,1);
   selectedCalendarDate = localDate(calendarCursor);
   renderCalendar();
 }
@@ -578,16 +606,12 @@ function openDetailFromCalendar(id){
 function renderToday(){
   const now = new Date();
   document.getElementById('todayDate').textContent = fmt(now);
-
   const events = getTodayEvents();
   const box = document.getElementById('specialBox');
 
   if(events.length){
     document.getElementById('specialList').innerHTML =
-      events.slice(0,3)
-        .map(e=>`<div class="special-item">${escapeHtml(e.label)}</div>`)
-        .join('');
-
+      events.slice(0,3).map(e=>`<div class="special-item">${escapeHtml(e.label)}</div>`).join('');
     box.classList.remove('hidden');
   }else{
     box.classList.add('hidden');
@@ -601,24 +625,14 @@ function getTodayEvents(){
 
   const fixed = fixedEvents
     .filter(e=>Number(e.m)===m && Number(e.d)===d)
-    .map(e=>({
-      ...e,
-      label:fixedEventLabel(e,now.getFullYear())
-    }));
+    .map(e=>({...e,label:fixedEventLabel(e,now.getFullYear())}));
   const project = [];
 
-  state.projects
-    .filter(p=>!p.archived)
-    .forEach(p=>{
-      projectMilestones(p)
-        .filter(x=>x.diff===0)
-        .forEach(x=>{
-          project.push({
-            type:'project',
-            label:`${x.special} ${p.title}`
-          });
-        });
+  state.projects.filter(p=>!p.archived).forEach(p=>{
+    projectMilestones(p).filter(x=>x.diff===0).forEach(x=>{
+      project.push({type:'project',label:`${x.special} ${p.title}`});
     });
+  });
 
   return [...project,...fixed];
 }
@@ -634,11 +648,9 @@ function renderHero(active){
   const p = active[0];
   const s = displayStatus(p);
   const info = typeInfo(p);
-
-  const count =
-    s.kind==='future' && s.diff>1
-      ? `<div class="hero-count"><span class="big">${s.diff}</span><span class="unit">日</span></div>`
-      : `<div class="hero-message">${escapeHtml(s.message)}</div>`;
+  const count = s.kind==='future' && s.diff>1
+    ? `<div class="hero-count"><span class="big">${s.diff}</span><span class="unit">日</span></div>`
+    : `<div class="hero-message">${escapeHtml(s.message)}</div>`;
 
   const heroCard = document.getElementById('heroCard');
   heroCard.style.setProperty('--member-color',memberColor(p));
@@ -652,14 +664,11 @@ function renderHero(active){
     ${quickLinksHtml(p)}
     <button class="text-btn" onclick="openDetail('${p.id}')" style="margin-top:10px">詳細を見る →</button>
   `;
-
   section.classList.remove('hidden');
 }
 
 function pinHtml(p){
-  return p.pinned
-    ? '<span class="card-pin" aria-label="ピン留め中">📌</span>'
-    : '';
+  return p.pinned ? '<span class="card-pin" aria-label="ピン留め中">📌</span>' : '';
 }
 
 function badgesHtml(p){
@@ -672,22 +681,13 @@ function badgesHtml(p){
 }
 
 function quickLinksHtml(p){
-  const links = (p.links || [])
-    .filter(l=>l.showOnHome)
-    .slice(0,3);
-
+  const links = (p.links || []).filter(l=>l.showOnHome).slice(0,3);
   if(!links.length) return '';
 
   return `
     <div class="quick-links">
       ${links.map(l=>`
-        <a
-          class="link-chip"
-          href="${escapeHtml(l.url)}"
-          target="_blank"
-          rel="noopener"
-          onclick="event.stopPropagation()"
-        >${escapeHtml(l.label || '開く')}</a>
+        <a class="link-chip" href="${escapeHtml(l.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${escapeHtml(l.label || '開く')}</a>
       `).join('')}
     </div>
   `;
@@ -697,46 +697,29 @@ function renderCards(active){
   const el = document.getElementById('projectList');
 
   if(!active.length){
-    el.innerHTML = `
-      <div class="empty">
-        まだプロジェクトがありません。<br>
-        右下のボタンから登録できます。
-      </div>
-    `;
+    el.innerHTML = '<div class="empty">まだプロジェクトがありません。<br>右下のボタンから登録できます。</div>';
     return;
   }
 
   el.innerHTML = active.map(p=>{
     const s = displayStatus(p);
     const info = typeInfo(p);
-
     let countdown = '';
 
     if(s.kind==='special'){
       countdown = `<div class="card-count special-count">${escapeHtml(s.message)}</div>`;
     }else if(s.kind==='future'){
-      countdown = `
-        <div class="card-count">
-          ${s.diff===1 ? '明日！' : `あと${s.diff}日`}
-        </div>
-      `;
+      countdown = `<div class="card-count">${s.diff===1 ? '明日！' : `あと${s.diff}日`}</div>`;
     }else{
       countdown = `<div class="card-count past-count">${escapeHtml(s.message)}</div>`;
     }
 
     return `
-      <article
-        class="card"
-        style="--member-color:${memberColor(p)}"
-        onclick="openDetail('${p.id}')"
-      >
+      <article class="card" style="--member-color:${memberColor(p)}" onclick="openDetail('${p.id}')">
         ${pinHtml(p)}
-
         ${s.sub ? `<div class="card-target">${escapeHtml(s.sub)}</div>` : ''}
         ${countdown}
-
         <div class="card-title">${info.icon} ${escapeHtml(p.title)}</div>
-
         ${p.memo ? `<div class="card-note">${escapeHtml(p.memo)}</div>` : ''}
         ${badgesHtml(p)}
         ${quickLinksHtml(p)}
@@ -793,9 +776,7 @@ function defaultMessage(type){
 function openEditor(id=''){
   const p = id ? state.projects.find(x=>x.id===id) : null;
 
-  document.getElementById('editTitle').textContent =
-    p ? 'プロジェクトを編集' : '新しいプロジェクト';
-
+  document.getElementById('editTitle').textContent = p ? 'プロジェクトを編集' : '新しいプロジェクト';
   document.getElementById('projectId').value = p?.id || '';
   document.getElementById('titleInput').value = p?.title || '';
   document.getElementById('typeInput').value = p?.type || 'digital';
@@ -805,15 +786,11 @@ function openEditor(id=''){
   document.getElementById('memoInput').value = p?.memo || '';
   document.getElementById('pinnedInput').checked = !!p?.pinned;
   document.getElementById('activeInput').checked = p ? !!p.active : true;
-  document.getElementById('flyingInput').checked =
-    p ? p.showFlyingGet!==false : true;
+  document.getElementById('flyingInput').checked = p ? p.showFlyingGet!==false : true;
   document.getElementById('messageInput').value = p?.eventMessage || '';
   document.getElementById('afterLabelInput').value = p?.afterLabel || '';
 
-  const visibility = {
-    ...DEFAULT_MILESTONE_VISIBILITY,
-    ...(p?.milestoneVisibility || {})
-  };
+  const visibility = {...DEFAULT_MILESTONE_VISIBILITY,...(p?.milestoneVisibility || {})};
   document.getElementById('milestone30Input').checked = visibility.day30;
   document.getElementById('milestone100Input').checked = visibility.day100;
   document.getElementById('milestoneHalfInput').checked = visibility.half;
@@ -828,12 +805,7 @@ function openEditor(id=''){
 
 function updateTypeFields(){
   const type = document.getElementById('typeInput').value;
-
-  document.getElementById('flyingRow').classList.toggle(
-    'hidden',
-    !(type==='cd' || type==='video')
-  );
-
+  document.getElementById('flyingRow').classList.toggle('hidden',!(type==='cd' || type==='video'));
   document.getElementById('messageInput').placeholder = defaultMessage(type);
   document.getElementById('defaultMilestones').classList.toggle('hidden', type==='event');
 }
@@ -860,32 +832,16 @@ function addMilestoneRow(item={id:uid('milestone'),label:'',date:'',message:''})
     <div class="milestone-editor-grid">
       <div class="field">
         <label>節目名</label>
-        <input
-          class="milestone-label"
-          type="text"
-          maxlength="30"
-          value="${escapeHtml(item.label || '')}"
-          placeholder="例：初週終了"
-        >
+        <input class="milestone-label" type="text" maxlength="30" value="${escapeHtml(item.label || '')}" placeholder="例：初週終了">
       </div>
       <div class="field">
         <label>日付</label>
-        <input
-          class="milestone-date"
-          type="date"
-          value="${escapeHtml(item.date || '')}"
-        >
+        <input class="milestone-date" type="date" value="${escapeHtml(item.date || '')}">
       </div>
     </div>
     <div class="field milestone-message-field">
       <label>当日のメッセージ <span class="optional-label">任意</span></label>
-      <input
-        class="milestone-message"
-        type="text"
-        maxlength="40"
-        value="${escapeHtml(item.message || '')}"
-        placeholder="未入力なら「🎉 節目名！」"
-      >
+      <input class="milestone-message" type="text" maxlength="40" value="${escapeHtml(item.message || '')}" placeholder="未入力なら「🎉 節目名！」">
     </div>
     <div class="milestone-editor-actions">
       <button type="button" class="text-btn remove-milestone">削除</button>
@@ -910,34 +866,17 @@ function addLinkRow(link={id:uid('link'),label:'',url:'',showOnHome:false}){
   row.innerHTML = `
     <div>
       <label>リンク名</label>
-      <input
-        class="link-label"
-        type="text"
-        value="${escapeHtml(link.label)}"
-        placeholder="YouTube"
-      >
+      <input class="link-label" type="text" value="${escapeHtml(link.label)}" placeholder="YouTube">
     </div>
-
     <div>
       <label>URL</label>
-      <input
-        class="link-url"
-        type="url"
-        value="${escapeHtml(link.url)}"
-        placeholder="https://..."
-      >
+      <input class="link-url" type="url" value="${escapeHtml(link.url)}" placeholder="https://...">
     </div>
-
     <div class="link-editor-actions">
       <label style="margin:0;font-weight:400">
-        <input
-          class="link-home"
-          type="checkbox"
-          ${link.showOnHome ? 'checked' : ''}
-        >
+        <input class="link-home" type="checkbox" ${link.showOnHome ? 'checked' : ''}>
         ホームに表示
       </label>
-
       <button type="button" class="text-btn remove-link">削除</button>
     </div>
   `;
@@ -986,16 +925,10 @@ document.getElementById('projectForm').addEventListener('submit',e=>{
     memo:document.getElementById('memoInput').value.trim(),
     pinned:document.getElementById('pinnedInput').checked,
     active:document.getElementById('activeInput').checked,
-    archived:id
-      ? (state.projects.find(x=>x.id===id)?.archived || false)
-      : false,
+    archived:id ? (state.projects.find(x=>x.id===id)?.archived || false) : false,
     showFlyingGet:document.getElementById('flyingInput').checked,
-    eventMessage:
-      document.getElementById('messageInput').value.trim() ||
-      defaultMessage(type),
-    afterLabel:
-      document.getElementById('afterLabelInput').value.trim() ||
-      TYPE[type].after,
+    eventMessage:document.getElementById('messageInput').value.trim() || defaultMessage(type),
+    afterLabel:document.getElementById('afterLabelInput').value.trim() || TYPE[type].after,
     milestoneVisibility:{
       day30:document.getElementById('milestone30Input').checked,
       day100:document.getElementById('milestone100Input').checked,
@@ -1023,65 +956,37 @@ document.getElementById('projectForm').addEventListener('submit',e=>{
 
 function openDetail(id){
   currentDetailId = id;
-
   const p = state.projects.find(x=>x.id===id);
   if(!p) return;
 
   const s = displayStatus(p);
-  const milestones = projectMilestones(p);
-
   const links = (p.links || [])
+    .filter(l=>l.url)
     .map(l=>`
-      <a
-        class="link-chip"
-        href="${escapeHtml(l.url)}"
-        target="_blank"
-        rel="noopener"
-        onclick="event.stopPropagation()"
-      >▶ ${escapeHtml(l.label || '開く')}</a>
+      <a class="link-chip" href="${escapeHtml(l.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">▶ ${escapeHtml(l.label || '開く')}</a>
     `)
     .join('');
 
   document.getElementById('detailContent').innerHTML = `
-    <div
-      class="panel detail-summary"
-      style="border-left:7px solid ${memberColor(p)}"
-    >
+    <div class="panel detail-summary" style="border-left:7px solid ${memberColor(p)}">
       ${pinHtml(p)}
       <div class="detail-muted">${typeInfo(p).icon} ${typeInfo(p).label}</div>
       <h2>${escapeHtml(p.title)}</h2>
       <div class="detail-count">${escapeHtml(s.message)}</div>
-      <div class="detail-muted">${escapeHtml(s.sub)}</div>
+      ${s.sub ? `<div class="detail-muted">${escapeHtml(s.sub)}</div>` : ''}
       ${badgesHtml(p)}
     </div>
 
-    <div class="panel">
-      <h3>主な節目</h3>
-      <ul class="milestones">
-        ${milestones.map(m=>`
-          <li class="${m.diff<0 ? 'done' : ''}">
-            <span>
-              ${m.diff<0 ? '✓' : '○'} ${escapeHtml(m.label)}<br>
-              <small>${fmt(m.date)}</small>
-            </span>
-            <span>
-              ${m.diff===0
-                ? '今日'
-                : m.diff>0
-                  ? `あと${m.diff}日`
-                  : `${Math.abs(m.diff)}日前`
-              }
-            </span>
-          </li>
-        `).join('')}
-      </ul>
+    <div class="panel route-panel">
+      <h3>今ここ</h3>
+      ${routeHtml(p)}
     </div>
 
     ${chartPanel(p)}
 
     ${links ? `
       <div class="panel">
-        <h3>今できること</h3>
+        <h3>関連リンク</h3>
         <div class="quick-links">${links}</div>
       </div>
     ` : ''}
@@ -1094,20 +999,9 @@ function openDetail(id){
     ` : ''}
 
     <div class="btn-row">
-      <button
-        class="primary"
-        onclick="closeModal('detailModal');openEditor('${p.id}')"
-      >編集</button>
-
-      <button
-        class="secondary"
-        onclick="archiveProject('${p.id}')"
-      >アーカイブ</button>
-
-      <button
-        class="danger"
-        onclick="deleteProject('${p.id}')"
-      >削除</button>
+      <button class="primary" onclick="closeModal('detailModal');openEditor('${p.id}')">編集</button>
+      <button class="secondary" onclick="archiveProject('${p.id}')">アーカイブ</button>
+      <button class="danger" onclick="deleteProject('${p.id}')">削除</button>
     </div>
   `;
 
@@ -1115,12 +1009,7 @@ function openDetail(id){
 }
 
 function estimatedChartPeriod(year,org,period){
-  const make = (start,end)=>({
-    start,
-    end,
-    announced:false,
-    estimated:true
-  });
+  const make = (start,end)=>({start,end,announced:false,estimated:true});
 
   if(period==='firstHalf'){
     return org==='billboard'
@@ -1157,9 +1046,7 @@ const OFFICIAL_CHART_PERIODS = {
 function chartPeriod(year,org,period){
   const official = OFFICIAL_CHART_PERIODS?.[year]?.[org]?.[period];
   if(official) return official;
-
-  return chartData?.years?.[year]?.[org]?.[period] ||
-    estimatedChartPeriod(year,org,period);
+  return chartData?.years?.[year]?.[org]?.[period] || estimatedChartPeriod(year,org,period);
 }
 
 function chartStatus(p,v){
@@ -1173,14 +1060,9 @@ function chartStatus(p,v){
   }
 
   const left = dayDiff(now,end);
-
   if(left>0) return {included:true,text:`期間終了まで あと${left}日`};
   if(left===0) return {included:true,text:'期間最終日'};
-
-  return {
-    included:true,
-    text:`対象期間終了（${Math.abs(left)}日前）`
-  };
+  return {included:true,text:`対象期間終了（${Math.abs(left)}日前）`};
 }
 
 function chartPanel(p){
@@ -1192,11 +1074,9 @@ function chartPanel(p){
   ['billboard','oricon'].forEach(org=>{
     ['firstHalf','annual'].forEach(period=>{
       const v = chartPeriod(year,org,period);
-
       const label =
         `${org==='billboard' ? 'Billboard' : 'オリコン'} ` +
         `${period==='firstHalf' ? '上半期' : '年間'}`;
-
       const st = chartStatus(p,v);
 
       rows.push(`
@@ -1206,7 +1086,6 @@ function chartPanel(p){
             <small>${v.start}〜${v.end}</small><br>
             <small>${escapeHtml(st.text)}</small>
           </span>
-
           <span class="status-tag ${v.announced ? 'official' : 'estimated'}">
             ${v.announced ? '公式確定' : '推定期間'}
           </span>
@@ -1218,12 +1097,8 @@ function chartPanel(p){
   return `
     <div class="panel">
       <h3>チャート期間</h3>
-      <p class="detail-muted chart-note">
-        基準日が各集計期間に含まれるかを自動判定しています。
-      </p>
-      <p class="chart-estimate-note">
-        ※「推定期間」は過去の集計傾向から算出した目安です。公式発表された期間ではありません。
-      </p>
+      <p class="detail-muted chart-note">基準日が各集計期間に含まれるかを自動判定しています。</p>
+      <p class="chart-estimate-note">※「推定期間」は過去の集計傾向から算出した目安です。公式発表された期間ではありません。</p>
       <ul class="milestones">${rows.join('')}</ul>
     </div>
   `;
@@ -1231,21 +1106,14 @@ function chartPanel(p){
 
 function archiveProject(id){
   if(!confirm('このプロジェクトをアーカイブしますか？')) return;
-
-  state.projects = state.projects.map(p=>
-    p.id===id ? {...p,archived:true} : p
-  );
-
+  state.projects = state.projects.map(p=>p.id===id ? {...p,archived:true} : p);
   saveState();
   closeModal('detailModal');
   render();
 }
 
 function restoreProject(id){
-  state.projects = state.projects.map(p=>
-    p.id===id ? {...p,archived:false} : p
-  );
-
+  state.projects = state.projects.map(p=>p.id===id ? {...p,archived:false} : p);
   saveState();
   render();
 }
@@ -1253,10 +1121,7 @@ function restoreProject(id){
 function deleteProject(id){
   const p = state.projects.find(x=>x.id===id);
 
-  if(
-    !p ||
-    !confirm(`「${p.title}」を削除しますか？\nこの操作は元に戻せません。`)
-  ){
+  if(!p || !confirm(`「${p.title}」を削除しますか？\nこの操作は元に戻せません。`)){
     return;
   }
 
@@ -1267,33 +1132,16 @@ function deleteProject(id){
 }
 
 function applySettings(){
-  document.documentElement.style.setProperty(
-    '--accent-strong',
-    state.settings.accent || DEFAULT_ACCENT
-  );
-
-  document.body.classList.toggle(
-    'dark',
-    state.settings.mode==='dark'
-  );
-
-  document.querySelector('meta[name="theme-color"]').content =
-    state.settings.accent || DEFAULT_ACCENT;
+  document.documentElement.style.setProperty('--accent-strong',state.settings.accent || DEFAULT_ACCENT);
+  document.body.classList.toggle('dark',state.settings.mode==='dark');
+  document.querySelector('meta[name="theme-color"]').content = state.settings.accent || DEFAULT_ACCENT;
 }
 
 function openSettings(){
-  document.getElementById('accentInput').value =
-    state.settings.accent || DEFAULT_ACCENT;
-
-  document.getElementById('modeInput').value =
-    state.settings.mode || 'light';
-
-  document.getElementById('openingInput').value =
-    state.settings.opening || 'special';
-
-  document.getElementById('effectInput').checked =
-    state.settings.effect!==false;
-
+  document.getElementById('accentInput').value = state.settings.accent || DEFAULT_ACCENT;
+  document.getElementById('modeInput').value = state.settings.mode || 'light';
+  document.getElementById('openingInput').value = state.settings.opening || 'special';
+  document.getElementById('effectInput').checked = state.settings.effect!==false;
   openModal('settingsModal');
 }
 
@@ -1302,18 +1150,10 @@ function resetAccentColor(){
 }
 
 function saveSettings(){
-  state.settings.accent =
-    document.getElementById('accentInput').value;
-
-  state.settings.mode =
-    document.getElementById('modeInput').value;
-
-  state.settings.opening =
-    document.getElementById('openingInput').value;
-
-  state.settings.effect =
-    document.getElementById('effectInput').checked;
-
+  state.settings.accent = document.getElementById('accentInput').value;
+  state.settings.mode = document.getElementById('modeInput').value;
+  state.settings.opening = document.getElementById('openingInput').value;
+  state.settings.effect = document.getElementById('effectInput').checked;
   saveState();
   closeModal('settingsModal');
   render();
@@ -1321,11 +1161,9 @@ function saveSettings(){
 
 function maybeDailyOpening(active){
   const today = localDate();
-
   if(state.settings.lastOpeningDate===today) return;
 
   const events = getTodayEvents();
-
   const should =
     state.settings.opening==='daily' ||
     (state.settings.opening==='special' && events.length);
@@ -1336,21 +1174,18 @@ function maybeDailyOpening(active){
   if(!should) return;
 
   document.getElementById('dailyDate').textContent = fmt(new Date());
-
   document.getElementById('dailyEvents').innerHTML =
     events.length
       ? events.slice(0,3).map(e=>`<div>${escapeHtml(e.label)}</div>`).join('')
       : '<div>今日の予定を確認しましょう。</div>';
 
   const p = active[0];
-
   document.getElementById('dailyNext').innerHTML =
     p
       ? `次の予定<br><strong>${escapeHtml(displayStatus(p).message)}</strong><br>${escapeHtml(p.title)}`
       : '登録中のプロジェクトはありません。';
 
   document.getElementById('dailyOverlay').classList.add('open');
-
   if(events.length && state.settings.effect) startSnow();
 }
 
@@ -1358,14 +1193,12 @@ function startSnow(){
   for(let i=0;i<24;i++){
     setTimeout(()=>{
       const s = document.createElement('div');
-
       s.className = 'snowflake';
       s.textContent = '❄';
       s.style.left = Math.random()*100+'vw';
       s.style.fontSize = (10+Math.random()*15)+'px';
       s.style.opacity = .35+Math.random()*.55;
       s.style.animationDuration = (2.5+Math.random()*2.5)+'s';
-
       document.body.appendChild(s);
       setTimeout(()=>s.remove(),5500);
     },i*70);
@@ -1373,39 +1206,26 @@ function startSnow(){
 }
 
 function downloadJson(data,name){
-  const blob = new Blob(
-    [JSON.stringify(data,null,2)],
-    {type:'application/json'}
-  );
-
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = name;
   a.click();
-
   setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 
 function exportProject(id){
   const p = state.projects.find(x=>x.id===id);
-
   if(p){
     downloadJson(
-      {
-        dataVersion:1,
-        kind:'snow-route-project',
-        project:{...p,pinned:false,archived:false}
-      },
+      {dataVersion:1,kind:'snow-route-project',project:{...p,pinned:false,archived:false}},
       `snow-route-${p.title}.json`
     );
   }
 }
 
 function exportAll(){
-  downloadJson(
-    state,
-    `snow-route-backup-${localDate()}.json`
-  );
+  downloadJson(state,`snow-route-backup-${localDate()}.json`);
 }
 
 async function importAll(file){
@@ -1416,24 +1236,15 @@ async function importAll(file){
       throw new Error('形式が違います');
     }
 
-    if(confirm(
-      '現在のデータに追加しますか？\n' +
-      '「キャンセル」を選ぶと、現在のデータを置き換えます。'
-    )){
+    if(confirm('現在のデータに追加しますか？\n「キャンセル」を選ぶと、現在のデータを置き換えます。')){
       const ids = new Set(state.projects.map(p=>p.id));
-
       data.projects.forEach(p=>{
-        state.projects.push(
-          ids.has(p.id)
-            ? {...p,id:uid('project')}
-            : p
-        );
+        state.projects.push(ids.has(p.id) ? {...p,id:uid('project')} : p);
       });
     }else{
       if(!confirm('現在のデータを置き換えます。よろしいですか？')){
         return;
       }
-
       state = {...defaultState(),...data};
     }
 
@@ -1482,13 +1293,8 @@ window.exportProject = exportProject;
 populateMembers();
 
 Promise.all([
-  fetch(CHART_URL)
-    .then(r=>r.ok ? r.json() : null)
-    .catch(()=>null),
-
-  fetch(CALENDAR_URL)
-    .then(r=>r.ok ? r.json() : null)
-    .catch(()=>null)
+  fetch(CHART_URL).then(r=>r.ok ? r.json() : null).catch(()=>null),
+  fetch(CALENDAR_URL).then(r=>r.ok ? r.json() : null).catch(()=>null)
 ]).then(([charts,calendar])=>{
   chartData = charts;
 
