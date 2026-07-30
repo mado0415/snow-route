@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#dceff7" />
   <meta name="description" content="Snow Manの作品やイベントを、あと何日と節目で管理するファンメイドツールです。" />
   <title>SNOW ROUTE</title>
-  <link rel="stylesheet" href="./style.css?v=1.0.1" />
+  <link rel="stylesheet" href="./style.css?v=1.0.2" />
 </head>
 <body>
 <main class="app">
@@ -158,6 +158,10 @@
 
         <div id="defaultMilestones">
           <div class="switch-row">
+            <div><strong>初週最終日</strong><small>発売・配信後、最初の日曜日</small></div>
+            <input class="switch milestone-switch" id="milestoneFirstWeekInput" type="checkbox" checked />
+          </div>
+          <div class="switch-row">
             <div><strong>30日</strong><small>基準日から30日後</small></div>
             <input class="switch milestone-switch" id="milestone30Input" type="checkbox" checked />
           </div>
@@ -260,6 +264,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=1.0.1" defer></script>
+<script src="./script.js?v=1.0.2" defer></script>
 </body>
 </html>
