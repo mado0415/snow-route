@@ -284,8 +284,69 @@ function displayStatus(p){
   };
 }
 
+function routeMilestones(p){
+  const milestones = projectMilestones(p).map(m=>({
+    ...m,
+    routeKind:'project'
+  }));
+
+  if(p.type!=='event'){
+    const year = parseDate(p.baseDate).getFullYear();
+
+    ['billboard','oricon'].forEach(org=>{
+      ['firstHalf','annual'].forEach(period=>{
+        const chart = chartPeriod(year,org,period);
+        const status = chartStatus(p,chart);
+
+        if(!status.included) return;
+
+        const label =
+          `${org==='billboard' ? 'Billboard' : 'オリコン'} ` +
+          `${period==='firstHalf' ? '上半期締切' : '年間締切'}`;
+        const date = parseDate(chart.end);
+
+        milestones.push({
+          key:`chart-${org}-${period}`,
+          label,
+          date,
+          diff:dayDiff(parseDate(localDate()),date),
+          routeKind:'chart',
+          announced:!!chart.announced
+        });
+      });
+    });
+  }
+
+  return milestones.sort((a,b)=>
+    a.date-b.date ||
+    (a.routeKind===b.routeKind ? 0 : a.routeKind==='chart' ? 1 : -1)
+  );
+}
+
+function routeNextSummary(milestones){
+  const next = milestones.find(m=>m.diff>0);
+
+  if(!next){
+    return `
+      <div class="route-next-summary route-next-complete">
+        <span>次の目標</span>
+        <strong>登録済みの節目をすべて通過しました</strong>
+      </div>
+    `;
+  }
+
+  const remaining = next.diff===1 ? '明日' : `あと${next.diff}日`;
+
+  return `
+    <div class="route-next-summary">
+      <span>次の目標</span>
+      <strong>${escapeHtml(next.label)}まで ${remaining}</strong>
+    </div>
+  `;
+}
+
 function routeHtml(p){
-  const milestones = projectMilestones(p);
+  const milestones = routeMilestones(p);
   const today = parseDate(localDate());
 
   if(!milestones.length){
@@ -316,6 +377,7 @@ function routeHtml(p){
         ? 'route-today'
         : 'route-future';
 
+    const kindClass = m.routeKind==='chart' ? 'route-chart' : '';
     const marker = m.diff<0 ? '✓' : m.diff===0 ? '●' : '○';
 
     const distanceText = m.diff===0
@@ -327,11 +389,11 @@ function routeHtml(p){
           : `${Math.abs(m.diff)}日前`;
 
     rows.push(`
-      <div class="route-item ${statusClass}">
+      <div class="route-item ${statusClass} ${kindClass}">
         <div class="route-marker"><span>${marker}</span></div>
         <div class="route-content">
-          <strong>${escapeHtml(m.label)}</strong>
-          <small>${fmt(m.date)}</small>
+          <strong>${m.routeKind==='chart' ? '<span class="route-chart-icon">🏆</span>' : ''}${escapeHtml(m.label)}</strong>
+          <small>${fmt(m.date)}${m.routeKind==='chart' && !m.announced ? '・推定' : ''}</small>
         </div>
         <div class="route-distance">${escapeHtml(distanceText)}</div>
       </div>
@@ -350,7 +412,10 @@ function routeHtml(p){
     `);
   }
 
-  return `<div class="route-list">${rows.join('')}</div>`;
+  return `
+    ${routeNextSummary(milestones)}
+    <div class="route-list">${rows.join('')}</div>
+  `;
 }
 
 function sortedProjects(list){
