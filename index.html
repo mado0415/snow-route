@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#dceff7" />
   <meta name="description" content="Snow Manの作品やイベントを、あと何日と節目で管理するファンメイドツールです。" />
   <title>SNOW ROUTE</title>
-  <link rel="stylesheet" href="./style.css?v=0.2.5" />
+  <link rel="stylesheet" href="./style.css?v=0.3.0" />
 </head>
 <body>
 <main class="app">
@@ -112,6 +112,42 @@
         </div>
       </div>
 
+
+      <div class="panel" id="milestonePanel">
+        <div class="section-head milestone-section-head">
+          <h2>節目</h2>
+        </div>
+        <p class="field-help">表示したい節目を選び、必要に応じて独自の節目を追加できます。</p>
+
+        <div id="defaultMilestones">
+          <div class="switch-row">
+            <div><strong>30日</strong><small>基準日から30日後</small></div>
+            <input class="switch milestone-switch" id="milestone30Input" type="checkbox" checked />
+          </div>
+          <div class="switch-row">
+            <div><strong>100日</strong><small>基準日から100日後</small></div>
+            <input class="switch milestone-switch" id="milestone100Input" type="checkbox" checked />
+          </div>
+          <div class="switch-row">
+            <div><strong>半年</strong><small>基準日から6か月後</small></div>
+            <input class="switch milestone-switch" id="milestoneHalfInput" type="checkbox" checked />
+          </div>
+          <div class="switch-row">
+            <div><strong>1周年</strong><small>基準日から1年後</small></div>
+            <input class="switch milestone-switch" id="milestoneYearInput" type="checkbox" checked />
+          </div>
+        </div>
+
+        <div class="custom-milestones-block">
+          <div class="section-head custom-milestone-head">
+            <h2>独自の節目</h2>
+            <button type="button" class="text-btn" id="addMilestoneBtn">＋追加</button>
+          </div>
+          <p class="field-help">例：初週終了、50日、キャンペーン最終日</p>
+          <div id="customMilestonesEditor"></div>
+        </div>
+      </div>
+
       <div class="panel">
         <div class="section-head" style="margin:0 0 6px">
           <h2>リンク</h2>
@@ -170,6 +206,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=0.2.5" defer></script>
+<script src="./script.js?v=0.3.0" defer></script>
 </body>
 </html>
