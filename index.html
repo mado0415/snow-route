@@ -47,7 +47,7 @@
         <div class="field"><label for="titleInput">タイトル *</label><input id="titleInput" type="text" maxlength="80" required /></div>
         <div class="field"><label for="typeInput">種類 *</label><select id="typeInput"><option value="digital">🎧 デジタル</option><option value="cd">💿 CD</option><option value="video">📀 DVD・Blu-ray</option><option value="event">🎯 目標・イベント</option></select></div>
         <div class="field"><label for="dateInput">基準日 *</label><input id="dateInput" type="date" required /></div>
-        <div class="field"><label for="memberInput">メンバーカラー</label><select id="memberInput"></select></div>
+        <div class="field"><label for="memberInput">表示カラー</label><select id="memberInput"></select></div>
         <div class="field hidden" id="customColorField"><label for="customColorInput">カスタムカラー</label><input id="customColorInput" type="color" value="#9bcce0" /></div>
         <div class="field"><label for="memoInput">メモ</label><textarea id="memoInput" maxlength="300" placeholder="例：初週はSTORE CHECKも見る"></textarea></div>
       </div>
@@ -61,7 +61,7 @@
       </div>
 
       <div class="panel">
-        <div class="section-head" style="margin:0 0 10px"><h2>リンク</h2><button type="button" class="text-btn" id="addLinkBtn">＋追加</button></div>
+        <div class="section-head" style="margin:0 0 6px"><h2>リンク</h2><button type="button" class="text-btn" id="addLinkBtn">＋追加</button></div><p class="field-help">「ホームに表示」を選んだリンクは、先頭から3件までカードに表示されます。</p>
         <div id="linksEditor"></div>
       </div>
 
@@ -85,8 +85,8 @@
     </div>
     <div class="panel">
       <h3 style="margin-top:0">バックアップ</h3>
-      <div class="btn-row"><button class="secondary" id="exportAllBtn">全体を書き出す</button><label class="secondary" style="display:inline-flex;align-items:center;margin:0">読み込む<input class="hidden" id="importAllInput" type="file" accept="application/json,.json" /></label></div>
-      <p class="detail-muted" style="font-size:12px">ブラウザデータを消すと登録内容が失われる場合があります。定期的な書き出しがおすすめです。</p>
+      <div class="btn-row"><button class="secondary" id="exportAllBtn">バックアップを保存</button><label class="secondary" style="display:inline-flex;align-items:center;margin:0">バックアップを読み込む<input class="hidden" id="importAllInput" type="file" accept="application/json,.json" /></label></div>
+      <p class="detail-muted" style="font-size:12px">ブラウザデータを消すと登録内容が失われる場合があります。機種変更やブラウザデータ消去に備えて、登録内容をJSONファイルとして保存できます。</p>
     </div>
   </section>
 </div>
