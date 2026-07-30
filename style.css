@@ -1398,3 +1398,70 @@ body.dark .view-tab.active {
     height:32px;
   }
 }
+
+
+/* v0.3.5 次の目標・チャート締切 */
+.route-next-summary {
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:12px;
+  margin:0 0 18px;
+  padding:12px 14px;
+  border:1px solid color-mix(in srgb, var(--accent-strong) 32%, var(--line));
+  border-radius:14px;
+  background:color-mix(in srgb, var(--accent) 25%, var(--card));
+}
+
+.route-next-summary span {
+  flex:0 0 auto;
+  color:var(--sub);
+  font-size:12px;
+  font-weight:700;
+}
+
+.route-next-summary strong {
+  min-width:0;
+  color:var(--accent-strong);
+  font-size:14px;
+  line-height:1.45;
+  text-align:right;
+}
+
+.route-next-complete strong {
+  color:var(--sub);
+}
+
+.route-chart .route-content strong {
+  color:#8a681d;
+}
+
+.route-chart-icon {
+  display:inline-block;
+  margin-right:5px;
+  font-size:14px;
+}
+
+.route-chart.route-past .route-content strong {
+  color:inherit;
+}
+
+body.dark .route-chart .route-content strong {
+  color:#e6c66d;
+}
+
+body.dark .route-chart.route-past .route-content strong {
+  color:inherit;
+}
+
+@media (max-width:420px) {
+  .route-next-summary {
+    display:block;
+  }
+
+  .route-next-summary strong {
+    display:block;
+    margin-top:4px;
+    text-align:left;
+  }
+}
