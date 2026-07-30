@@ -905,3 +905,25 @@ body.dark .chart-estimate-note {
     gap:0;
   }
 }
+
+
+/* v0.3.1 アクセントカラー初期化 */
+.reset-accent-btn {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:auto;
+  margin-top:10px;
+  padding:7px 0;
+  border:0;
+  background:transparent;
+  color:var(--accent);
+  font:inherit;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.reset-accent-btn:active {
+  opacity:.65;
+}
