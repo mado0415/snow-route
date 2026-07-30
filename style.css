@@ -1465,3 +1465,52 @@ body.dark .route-chart.route-past .route-content strong {
     text-align:left;
   }
 }
+
+
+/* v0.3.7 プロジェクト共有 */
+.share-panel h3,
+.shared-preview h2 {
+  margin-top:0;
+}
+
+.share-note {
+  margin:-3px 0 13px;
+  font-size:12px;
+  line-height:1.6;
+}
+
+.share-actions {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+}
+
+.share-actions button {
+  width:100%;
+  min-height:48px;
+}
+
+.shared-project-date {
+  margin:8px 0 3px;
+  font-size:22px;
+  font-weight:800;
+}
+
+.shared-project-summary {
+  margin:14px 0 0;
+  color:var(--sub);
+  font-size:13px;
+}
+
+.shared-project-memo {
+  margin:14px 0 0;
+  padding-top:14px;
+  border-top:1px solid var(--line);
+  line-height:1.65;
+}
+
+@media (max-width:360px) {
+  .share-actions {
+    grid-template-columns:1fr;
+  }
+}
