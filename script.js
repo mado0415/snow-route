@@ -3,6 +3,7 @@ const STORAGE_KEY = 'snowRouteDataV1';
 const CHART_URL = './calendar-periods.json';
 const CALENDAR_URL = './calendar.json';
 const DEFAULT_ACCENT = '#5aa9ca';
+const CHART_DATA_WARNING_DAYS = 30;
 
 const TYPE = {
   digital:{icon:'🎧',label:'デジタル',day:'㊗️ 配信開始！',after:'リリースから'},
@@ -1206,6 +1207,91 @@ function deleteProject(id){
   render();
 }
 
+function chartDataInfo(){
+  if(!chartData || typeof chartData !== 'object'){
+    return {
+      state:'error',
+      label:'データを確認できません',
+      title:'チャート期間データを読み込めませんでした',
+      text:'通信状況を確認して、ページを開き直してください。',
+      years:'—',
+      updatedAt:'—',
+      validUntil:'—'
+    };
+  }
+
+  const years = Object.keys(chartData.years || {})
+    .map(Number)
+    .filter(Number.isFinite)
+    .sort((a,b)=>a-b);
+  const latestYear = years.length ? years[years.length-1] : null;
+  const updatedAt = chartData.updatedAt || '—';
+  const validUntil = chartData.validUntil || '';
+  const today = parseDate(localDate());
+  const expiry = validUntil ? parseDate(validUntil) : null;
+  const daysLeft = expiry ? dayDiff(today,expiry) : null;
+  const currentYear = today.getFullYear();
+  const lacksCurrentYear = !latestYear || latestYear < currentYear;
+
+  if(lacksCurrentYear || (daysLeft!==null && daysLeft<0)){
+    return {
+      state:'expired',
+      label:'更新が必要です',
+      title:'チャート期間データの更新が必要です',
+      text:lacksCurrentYear
+        ? `${currentYear}年版のデータがまだ登録されていません。管理者による更新をお待ちください。`
+        : `確認期限を${Math.abs(daysLeft)}日過ぎています。表示中の推定期間は目安としてご覧ください。`,
+      years:years.length ? `${years[0]}〜${latestYear}年` : '—',
+      updatedAt,
+      validUntil:validUntil || '未設定'
+    };
+  }
+
+  if(daysLeft!==null && daysLeft<=CHART_DATA_WARNING_DAYS){
+    return {
+      state:'warning',
+      label:'そろそろ更新時期です',
+      title:'チャート期間データの確認時期が近づいています',
+      text:`確認期限まであと${daysLeft}日です。現在の表示は引き続き利用できます。`,
+      years:years.length ? `${years[0]}〜${latestYear}年` : '—',
+      updatedAt,
+      validUntil
+    };
+  }
+
+  return {
+    state:'current',
+    label:'最新データを使用中',
+    title:'',
+    text:'',
+    years:years.length ? `${years[0]}〜${latestYear}年` : '—',
+    updatedAt,
+    validUntil:validUntil || '未設定'
+  };
+}
+
+function renderChartDataStatus(){
+  const info = chartDataInfo();
+  const notice = document.getElementById('chartDataNotice');
+  const status = document.getElementById('chartDataStatus');
+
+  if(notice){
+    const showNotice = info.state!=='current';
+    notice.classList.toggle('hidden',!showNotice);
+    notice.dataset.state = info.state;
+    document.getElementById('chartDataNoticeTitle').textContent = info.title;
+    document.getElementById('chartDataNoticeText').textContent = info.text;
+  }
+
+  if(status){
+    status.dataset.state = info.state;
+    document.getElementById('chartDataStatusLabel').textContent = info.label;
+    document.getElementById('chartDataYears').textContent = info.years;
+    document.getElementById('chartDataUpdatedAt').textContent = info.updatedAt;
+    document.getElementById('chartDataValidUntil').textContent = info.validUntil;
+  }
+}
+
 function applySettings(){
   document.documentElement.style.setProperty('--accent-strong',state.settings.accent || DEFAULT_ACCENT);
   document.body.classList.toggle('dark',state.settings.mode==='dark');
@@ -1217,6 +1303,7 @@ function openSettings(){
   document.getElementById('modeInput').value = state.settings.mode || 'light';
   document.getElementById('openingInput').value = state.settings.opening || 'special';
   document.getElementById('effectInput').checked = state.settings.effect!==false;
+  renderChartDataStatus();
   openModal('settingsModal');
 }
 
@@ -1539,10 +1626,11 @@ window.cancelSharedProject = cancelSharedProject;
 populateMembers();
 
 Promise.all([
-  fetch(CHART_URL).then(r=>r.ok ? r.json() : null).catch(()=>null),
-  fetch(CALENDAR_URL).then(r=>r.ok ? r.json() : null).catch(()=>null)
+  fetch(`${CHART_URL}?t=${Date.now()}`,{cache:'no-store'}).then(r=>r.ok ? r.json() : null).catch(()=>null),
+  fetch(`${CALENDAR_URL}?t=${Date.now()}`,{cache:'no-store'}).then(r=>r.ok ? r.json() : null).catch(()=>null)
 ]).then(([charts,calendar])=>{
   chartData = charts;
+  renderChartDataStatus();
 
   if(calendar?.events && Array.isArray(calendar.events)){
     const legacyExtras = calendar.events.filter(event=>
