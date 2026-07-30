@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#dceff7" />
   <meta name="description" content="Snow Manの作品やイベントを、あと何日と節目で管理するファンメイドツールです。" />
   <title>SNOW ROUTE</title>
-  <link rel="stylesheet" href="./style.css?v=0.2.3.1" />
+  <link rel="stylesheet" href="./style.css?v=0.2.4" />
 </head>
 <body>
 <main class="app">
@@ -25,7 +25,7 @@
   </section>
 
   <section id="heroSection" class="hidden">
-    <div class="section-head"><h2>次の予定</h2></div>
+    <div class="section-head"><h2>これからの節目</h2></div>
     <article class="hero" id="heroCard"></article>
   </section>
 
@@ -65,9 +65,11 @@
             </select>
           </div>
 
-          <div class="field">
+          <div class="field date-field">
             <label for="dateInput">基準日 *</label>
-            <input id="dateInput" type="date" required />
+            <div class="date-input-wrap">
+              <input id="dateInput" type="date" required />
+            </div>
           </div>
         </div>
 
@@ -168,6 +170,6 @@
   </div>
 </div>
 
-<script src="./script.js?v=0.2.3.1" defer></script>
+<script src="./script.js?v=0.2.4" defer></script>
 </body>
 </html>
